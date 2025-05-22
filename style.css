@@ -1,0 +1,230 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Netflix Sans', Helvetica Neue, Segoe UI, Roboto, Ubuntu, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+body, html {
+  height: 100%;
+  overflow: hidden;
+  direction: ltr;
+}
+
+/* Background setup */
+.background {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+}
+
+.bg-img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  filter: brightness(0.7);
+}
+
+.overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 2;
+}
+
+.login-container {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 20px;
+}
+
+.logo-img {
+  width: 250px;
+  margin-bottom: 40px;
+  position: absolute;
+  top: 50px;
+  left: 100px;
+}
+
+.login-box {
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 25px 58px 15px;
+  width: 100%;
+  max-width: 450px;
+  border-radius: 4px;
+  color: #000;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.login-box h2 {
+  margin-bottom: 28px;
+  color: white;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.login-box input {
+  background: transparent;
+  border: 1px solid white;
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 16px;
+  color: white;
+  font-size: 16px;
+  pointer-events: auto;
+}
+
+.login-box button {
+  padding: 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  pointer-events: auto;
+  font-weight: bold;
+}
+
+.login-box button[type="submit"] {
+  background-color: #e50914;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.code-btn {
+  background-color: #333;
+  color: white;
+  margin-bottom: 16px;
+  font-weight: bold;
+}
+
+.divider {
+  text-align: center;
+  margin-bottom: 16px;
+  color: #aaa;
+  font-size: 14px;
+}
+
+.forgot {
+  text-align: center;
+  display: inline-block;
+  margin-bottom: 8px;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.forgot:hover {
+  text-decoration: underline;
+}
+
+.remember {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 16px;
+  color: white;
+  pointer-events: auto;
+  gap: 2px;
+  line-height: 1;
+}
+
+.remember input[type="checkbox"] {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid white;
+  background-color: transparent;
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0;
+  transform: scale(0.4);
+}
+
+.remember input[type="checkbox"]:checked {
+  background-color: white;
+}
+
+.remember input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 13px;
+  width: 6px;
+  height: 19px;
+  border: solid black;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.signup {
+  font-size: 14px;
+  text-align: left;
+  color: #aaa;
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.signup a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.note {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 10px;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.note a {
+  color: #0071eb;
+  text-decoration: none;
+}
+
+.note a:hover {
+  text-decoration: underline;
+}
+
+.input-error {
+  color: #e87c03;
+  font-size: 13px;
+  margin-top: -12px;
+  margin-bottom: 8px;
+  display: none;
+}
+
+input.error {
+  border: 1px solid #e87c03;
+}
+
+.credential-error {
+  background-color: #e87c03;
+  color: black;
+  font-size: 14px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  display: none;
+}
+
+.credential-error strong {
+  font-weight: bold;
+}

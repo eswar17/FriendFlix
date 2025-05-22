@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FriendFlix - Who's Watching?</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 40px;
+    }
+
+    .profiles {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .profile {
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .profile:hover {
+      transform: scale(1.1);
+    }
+
+    .profile img {
+      width: 120px;
+      height: 120px;
+      border-radius: 8px;
+      border: 3px solid transparent;
+      object-fit: cover;
+    }
+
+    .profile-name {
+      margin-top: 10px;
+      font-size: 1.2rem;
+    }
+
+    .manage-btn {
+      background: transparent;
+      border: 1px solid #888;
+      color: #888;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .manage-btn:hover {
+      color: white;
+      border-color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Who's watching?</h1>
+
+  <div class="profiles">
+    <div class="profile">
+      <img src="red.jpg" alt="Bhargav" />
+      <div class="profile-name">Bhargav</div>
+    </div>
+    <div class="profile">
+      <img src="blue.jpg" alt="Charan" />
+      <div class="profile-name">Charan</div>
+    </div>
+    <div class="profile">
+      <img src="yellow.jpg" alt="Eswar" />
+      <div class="profile-name">Eswar</div>
+    </div>
+    <div class="profile">
+      <img src="green.jpg" alt="Pavan" />
+      <div class="profile-name">Pavan</div>
+    </div>
+  </div>
+
+  <button class="manage-btn">Manage Profiles</button>
+<script>
+  document.querySelectorAll('.profile').forEach(profile => {
+    profile.addEventListener('click', () => {
+      const name = profile.querySelector('.profile-name').textContent.trim();
+      window.location.href = `HomeScreen.html?user=${encodeURIComponent(name)}`;
+    });
+  });
+
+  document.querySelector('.manage-btn').addEventListener('click', () => {
+    window.location.href = "manage.html";
+  });
+</script>
+
+</body>
+</html>

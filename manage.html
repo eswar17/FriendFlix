@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Profiles - FriendFlix</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      padding: 40px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 40px;
+    }
+
+    .profile-grid {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .profile-box {
+      background-color: transparent;
+      border-radius: 10px;
+      width: 150px;
+      text-align: center;
+      position: relative;
+      padding: 20px 10px;
+    }
+
+    .profile-img-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .profile-img-wrapper img.profile-img {
+      width: 120px;
+      height: 120px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .edit-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 28px;
+      height: 28px;
+      transform: translate(-50%, -50%);
+      opacity: 0.8;
+      cursor: pointer;
+    }
+
+    .profile-name {
+      margin-top: 10px;
+    }
+
+    .add-profile {
+      margin-top: 40px;
+    }
+
+    .add-profile button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      background-color: transparent;
+      color: #888;
+      border: 1px solid #888;
+      margin: 0 10px;
+    }
+
+    .add-profile button:hover {
+      color: white;
+      border-color: white;
+    }
+	
+	.profile-box:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Manage Profiles</h1>
+
+  <div class="profile-grid">
+    <div class="profile-box">
+      <div class="profile-img-wrapper">
+        <img src="red.jpg" alt="Bhargav" class="profile-img" />
+        <img src="Edit.png" class="edit-icon" alt="Edit" />
+      </div>
+      <div class="profile-name">Bhargav</div>
+    </div>
+
+    <div class="profile-box">
+      <div class="profile-img-wrapper">
+        <img src="blue.jpg" alt="Charan" class="profile-img" />
+        <img src="Edit.png" class="edit-icon" alt="Edit" />
+      </div>
+      <div class="profile-name">Charan</div>
+    </div>
+
+    <div class="profile-box">
+      <div class="profile-img-wrapper">
+        <img src="yellow.jpg" alt="Eswar" class="profile-img" />
+        <img src="Edit.png" class="edit-icon" alt="Edit" />
+      </div>
+      <div class="profile-name">Eswar</div>
+    </div>
+
+    <div class="profile-box">
+      <div class="profile-img-wrapper">
+        <img src="green.jpg" alt="Pavan" class="profile-img" />
+        <img src="Edit.png" class="edit-icon" alt="Edit" />
+      </div>
+      <div class="profile-name">Pavan</div>
+    </div>
+  </div>
+
+  <div class="add-profile">
+    <button class="add-profile-btn">+ Add Profile</button>
+    <button class="back-profile-btn">Back</button>
+  </div>
+
+  <script>
+    document.querySelectorAll('.edit-icon, .add-profile-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        alert("⚠️ This feature will be available once database is connected.");
+      });
+    });
+
+    document.querySelector('.back-profile-btn').addEventListener('click', () => {
+      window.location.href = "ProfileScreen.html";
+    });
+  </script>
+
+</body>
+</html>

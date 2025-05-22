@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FriendFlix | Login</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="background">
+    <img src="background.jpg" class="bg-img" alt="Background">
+    <div class="overlay"></div>
+    <div class="login-container">
+      <img src="FriendFlix.png" class="logo-img" alt="FriendFlix Logo">
+      <form class="login-box">
+        <h2>Sign In</h2>
+		<div id="credential-error" class="credential-error">
+          <strong>Incorrect password for <span id="email-highlight"></span></strong><br />
+          You can use a sign-in code, reset your password or try again.
+        </div>
+        <input type="text" placeholder="Email or mobile number" required />
+        <div id="email-error" class="input-error">Please enter a valid email or phone number.</div>
+        <input type="password" placeholder="Password" required />
+        <div id="password-error" class="input-error">Your password must contain between 4 and 60 characters.</div>
+        <button type="submit">Sign In</button>
+        <div class="divider">OR</div>
+        <button class="code-btn" type="button">Use a sign-in code</button>
+        <a href="#" class="forgot">Forgot password?</a>
+        <div class="remember">
+          <input type="checkbox" id="remember" />
+          <label for="remember">Remember me</label>
+        </div>
+        <div class="signup">
+          New to FriendFlix? <a href="signup.html">Sign up now.</a>
+        </div>
+        <p class="note">This page is protected by Google reCAPTCHA to ensure you're not a bot. <a href="#">Learn more.</a></p>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

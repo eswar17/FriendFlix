@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FriendFlix | Sign Up</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="signup.js"></script>
+</head>
+<body>
+  <div class="background">
+    <img src="background.jpg" class="bg-img" alt="Background">
+    <div class="overlay"></div>
+    <div class="login-container">
+      <img src="FriendFlix.png" class="logo-img" alt="FriendFlix Logo">
+      <form class="login-box" id="signupForm">
+        <h2>Sign Up</h2>
+        <div id="signup-status" class="input-error" style="display: none;"></div>
+        <input type="text" id="phone" placeholder="Phone number" required />
+        <div id="phone-error" class="input-error">Please enter a valid phone number.</div>
+        <input type="password" id="password" placeholder="Password" required />
+        <div id="password-error" class="input-error">Your password must contain between 4 and 60 characters.</div>
+        <button type="submit">Register</button>
+        <div class="divider">OR</div>
+        <a href="login.html" class="forgot">Already have an account? Sign in</a>
+        <div class="signup">
+          <p>By signing up, you agree to the FriendFlix terms and privacy policy.</p>
+        </div>
+        <p class="note">This page is protected by Google reCAPTCHA to ensure you're not a bot. <a href="#">Learn more.</a></p>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
