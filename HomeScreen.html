@@ -175,7 +175,7 @@
   <div style="display: flex; align-items: center;">
     <img src="FriendFlix.png" class="logo" alt="FriendFlix Logo">
     <nav>
-      <a href="#">Home</a>
+      <a href="#" id="homeLink">Home</a>
       <a href="#">TV Shows</a>
       <a href="#">Movies</a>
       <a href="#">My List</a>
@@ -271,6 +271,7 @@
   const mainContent = $("mainContent");
   const userName = new URLSearchParams(window.location.search).get("user") || "User";
   $("username").textContent = userName;
+  document.getElementById("homeLink").href = `?user=${userName}`;
   let flag=false;
 
   let hasInteracted = false;
