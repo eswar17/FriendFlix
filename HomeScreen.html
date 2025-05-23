@@ -167,6 +167,29 @@
       background-color: black; z-index: 1000;
       min-height: calc(100vh - 70px); overflow-y: auto;
     }
+.movie-title {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: #f9f871;
+  font-size: 22px;
+  text-align: center;
+  padding: 12px 0;
+  font-weight: bold;
+  z-index: 3;
+  font-family: 'Courier New', cursive;
+  letter-spacing: 1px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
+}
+.movie-card:hover .movie-title {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
 }
   </style>
 </head>
@@ -207,7 +230,7 @@
   <h2 class="first-section-title">FriendFlix Originals</h2>
   <div class="row">
     <div class="movie-card" data-video="Videos/pavanPelliHighlights.mp4"><img src="Videos/pavanPelliHighlights.jpg" alt="pavanPelliHighlights"><video muted></video><div class="tag">Recently added</div></div>
-    <div class="movie-card" data-video="Videos/bgmi.mp4"><img src="Videos/bgmi.jpg" alt="Movie 2"><video muted></video></div>
+    <div class="movie-card" data-video="Videos/bgmi.mp4"><img src="Videos/bgmi.jpg" alt="Movie 2"><video muted></video><div class="movie-title">Pavan Pelli Highlights</div></div>
     <div class="movie-card" data-video="Videos/invitation.mp4"><img src="Videos/invitation.jpg" alt="Movie 3"><video muted></video></div>
     <div class="movie-card" data-video="Videos/anniversary.mp4"><img src="Videos/anniversary.jpg" alt="Movie 4"><video muted></video></div>
     <div class="movie-card" data-video="Videos/marryMe.mp4"><img src="Videos/marryMe.jpg" alt="Movie 5"><video muted></video></div>
