@@ -20,9 +20,19 @@
     }
     nav a:hover { text-decoration: underline; }
     .search-box {
-      display: flex; align-items: center;
-      border: 1px solid hsla(0, 0%, 100%, 0.85);
-    }
+	  display: flex;
+	  align-items: center;
+	  border: 1px solid hsla(0, 0%, 100%, 0.85);
+	  padding: 4px 10px;
+	  border-radius: 6px;
+	  background-color: #111;
+	}
+	
+	.search-icon {
+	  font-size: 18px;
+	  margin-right: 8px;
+	  color: #ccc;
+	}
     .search-box input {
       background: transparent; border: none;
       font-size: 14px; color: #fff;
@@ -43,7 +53,7 @@
       color: white; cursor: pointer;
     }
     .hero-overlay {
-      position: absolute; bottom: 230px; left: 30px;
+      position: absolute; bottom: 180px; left: 30px;
       max-width: 600px; color: white;
       text-shadow: 0 2px 4px rgba(0,0,0,0.8);
       z-index: 2; transition: opacity 0.5s ease;
@@ -65,7 +75,7 @@
     .first-section-title, .section-title {
       margin: 40px 30px 20px; font-size: 27px; position: relative; z-index: 1;
     }
-    .first-section-title { margin-top: -200px; }
+    .first-section-title { margin-top: -130px; }
     .row {
       display: flex; overflow-x: auto;
       padding-left: 30px; gap: 20px;
@@ -154,6 +164,7 @@
       <a href="#">My List</a>
     </nav></div>
 	<div class="search-box">
+	  <span class="search-icon">🔍</span>
       <input type="text" id="searchInput" placeholder="Titles,people,genres..." />
     </div>
   </header>
@@ -178,10 +189,10 @@
 
   <h2 class="first-section-title">FriendFlix Originals</h2>
   <div class="row">
-    <div class="movie-card" data-video="Videos/anniversary.mp4"><img src="Videos/anniversary.jpg" alt="Movie 1"><video muted></video><div class="tag">Recently added</div></div>
+    <div class="movie-card" data-video="Videos/pavanPelliHighlights.mp4"><img src="Videos/pavanPelliHighlights.jpg" alt="pavanPelliHighlights"><video muted></video><div class="tag">Recently added</div></div>
+    <div class="movie-card" data-video="Videos/anniversary.mp4"><img src="Videos/anniversary.jpg" alt="Movie 1"><video muted>
     <div class="movie-card" data-video="Videos/bgmi.mp4"><img src="Videos/bgmi.jpg" alt="Movie 2"><video muted></video></div>
     <div class="movie-card" data-video="Videos/invitation.mp4"><img src="Videos/invitation.jpg" alt="Movie 3"><video muted></video></div>
-    <div class="movie-card" data-video="Videos/maldives.mp4"><img src="Videos/maldives.jpg" alt="Movie 4"><video muted></video></div>
     <div class="movie-card" data-video="Videos/marryMe.mp4"><img src="Videos/marryMe.jpg" alt="Movie 5"><video muted></video></div>
   </div>
 
@@ -195,7 +206,7 @@
 
   <h2 class="section-title">Scenes from our story</h2>
   <div class="row">
-    <div class="movie-card" data-video="kdrama1.mp4"><img src="kdrama1.jpg" alt="Kdrama 1"><video muted></video></div>
+    <div class="movie-card" data-video="Videos/pavanPelliHighlights.mp4"><img src="Videos/pavanPelliHighlights.jpg" alt="pavanPelliHighlights"><video muted></video></div>
     <div class="movie-card" data-video="kdrama2.mp4"><img src="kdrama2.jpg" alt="Kdrama 2"><video muted></video></div>
     <div class="movie-card" data-video="kdrama3.mp4"><img src="kdrama3.jpg" alt="Kdrama 3"><video muted></video></div>
     <div class="movie-card" data-video="kdrama4.mp4"><img src="kdrama4.jpg" alt="Kdrama 4"><video muted></video></div>
