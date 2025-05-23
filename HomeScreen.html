@@ -44,7 +44,7 @@
       position: relative; object-fit: cover;
       overflow: hidden; transition: opacity 0.5s ease;
     }
-    .controls { position: absolute; bottom: 230px; z-index: 2; }
+    .controls { position: absolute; bottom: 160px; z-index: 2; }
     .left-controls { left: 30px; }
     .right-controls { right: 30px; position: absolute; }
     .controls button {
@@ -53,7 +53,7 @@
       color: white; cursor: pointer;
     }
     .hero-overlay {
-      position: absolute; bottom: 230px; left: 30px;
+      position: absolute; bottom: 160px; left: 30px;
       max-width: 600px; color: white;
       text-shadow: 0 2px 4px rgba(0,0,0,0.8);
       z-index: 2; transition: opacity 0.5s ease;
@@ -75,7 +75,7 @@
     .first-section-title, .section-title {
       margin: 40px 30px 20px; font-size: 27px; position: relative; z-index: 1;
     }
-    .first-section-title { margin-top: -200px; }
+    .first-section-title { margin-top: -120px; }
     .row {
       display: flex; overflow-x: auto;
       padding-left: 30px; gap: 20px;
@@ -129,6 +129,7 @@
       position: absolute; bottom: 20px;
       left: 20px; right: 20px; z-index: 1;
     }
+
     .more-info-modal h1 { font-size: 36px; margin-bottom: 10px; }
     .more-info-modal .meta { font-size: 14px; color: #aaa; margin-bottom: 10px; }
     .more-info-modal .description { font-size: 16px; line-height: 1.5; }
@@ -137,6 +138,21 @@
       font-size: 28px; background: none;
       color: white; border: none;
       cursor: pointer; z-index: 2;
+    }
+	.more-info-modal .play-btn {
+      position: absolute; bottom: 40px; right: 30px;
+      font-size: 28px; background: none;
+      color: white; border: none;
+      cursor: pointer; z-index: 2;
+	      padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+	background-color: white;
+    color: black;
     }
     #moreInfoBackdrop {
       display: none; position: fixed; top: 0; left: 0;
@@ -151,6 +167,7 @@
       background-color: black; z-index: 1000;
       min-height: calc(100vh - 70px); overflow-y: auto;
     }
+}
   </style>
 </head>
 <body>
@@ -214,10 +231,12 @@
   
   <div class="more-info-modal" id="moreInfo">
     <div class="description" id="moreInfoContent"></div>
+	<img id="modalPoster" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1;" />
     <video class="modal-video" id="modalVideo" autoplay loop muted playsinline>
        <source id="modalVideoSource" src="" type="video/mp4">
     </video>
-      <button class="close-btn"  id="closeInfo" onclick="document.getElementById('moreInfo').style.display='none'">&times;</button>
+      <button class="close-btn"  id="closeInfo">&times;</button>
+	   <button class="play-btn"  id="playVideo">▶ Play</button>
     <div class="content">
       <h1 id="infoTitle"></h1>
       <div class="meta"  id="infoMeta"></div>
@@ -246,11 +265,13 @@
   const infoBackdrop = $("moreInfoBackdrop");
   const infoBtn = $("infoBtn");
   const closeInfo = $("closeInfo");
+  const playVideo = $("playVideo");
   const searchInput = $("searchInput");
   const searchResults = $("searchResults");
   const mainContent = $("mainContent");
   const userName = new URLSearchParams(window.location.search).get("user") || "User";
   $("username").textContent = userName;
+  let flag=false;
 
   let hasInteracted = false;
 
@@ -283,6 +304,11 @@
     fullscreenVideo.removeAttribute('src');
     fullscreenVideo.load();
     mainVideo.play();
+	if(flag){
+	  infoModal.style.display = "block";
+	  mainVideo.pause();
+	  flag=false;
+	}
   }
 
   document.addEventListener("scroll", () => {
@@ -331,6 +357,7 @@
     {
       src: "Videos/invitation.mp4",
       title: "The Invitation",
+	  image: "Videos/invitation.jpg",
       subtitle: "A prelude to love, filmed in the heart of Araku",
       desc: "Shot in the serene hills of Araku, Kavya and Bhargav's pre-wedding journey unfolds like a dream — a celebration of love, laughter, and the promise of always.",
       meta: "2022 | Pre-Wedding Short Film | Telugu | Araku",
@@ -343,6 +370,7 @@
     {
       src: "Videos/bgmi.mp4",
       title: "BGMI Beats",
+	  image: "Videos/bgmi.jpg",
       subtitle: "Game of Hearts",
       desc: "Bhargav’s favorite game became Kavya’s secret mission. What started as gameplay turned into a celebration of love and laughter.",
       meta: "2024 | Surprise Anniversary Video | Telugu | BGMI",
@@ -364,19 +392,55 @@
   $("modalVideoSource").src = randomVideo.src;
   $("modalVideo").load();
 
-  infoBtn.addEventListener("click", () => {
-    $("infoTitle").textContent = randomVideo.title;
-    $("infoMeta").textContent = randomVideo.meta;
-    $("infoDescription").innerHTML = randomVideo.info;
-    infoBackdrop.style.display = "block";
-    infoModal.style.display = "block";
-    mainVideo.pause();
-  });
+infoBtn.addEventListener("click", () => {
+  $("infoTitle").textContent = randomVideo.title;
+  $("infoMeta").textContent = randomVideo.meta;
+  $("infoDescription").innerHTML = randomVideo.info;
+
+  const modalVideo = $("modalVideo");
+  const modalSource = $("modalVideoSource");
+  const posterImg = $("modalPoster");
+
+  posterImg.style.display = "none"; // hide the image initially
+  modalVideo.style.display = "block"; // ensure video is visible
+
+  modalSource.src = randomVideo.src;
+  modalVideo.load();
+
+  modalVideo.onloadedmetadata = () => {
+    const maxStart = Math.max(0, modalVideo.duration - 10);
+    const randomStart = Math.random() * maxStart;
+    modalVideo.currentTime = randomStart;
+    modalVideo.play();
+
+    setTimeout(() => {
+      modalVideo.pause();
+      modalVideo.style.display = "none";         // hide video
+      posterImg.src = randomVideo.image;         // show poster image
+      posterImg.style.display = "block";
+      posterImg.style.opacity = 0.7;
+    }, 10000);
+  };
+
+  infoBackdrop.style.display = "block";
+  infoModal.style.display = "block";
+  mainVideo.pause();
+});
+
+
 
   closeInfo.addEventListener("click", () => {
     infoModal.style.display = "none";
     infoBackdrop.style.display = "none";
     mainVideo.play();
+  });
+  
+  playVideo.addEventListener("click", () => {
+    infoModal.style.display = "none";
+    fullscreenVideo.src = mainVideo.querySelector("source").src;
+    fullscreenPlayer.style.display = 'flex';
+    fullscreenVideo.play();
+	flag=true;
   });
 
   const movieData = [
