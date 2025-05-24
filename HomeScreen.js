@@ -11,8 +11,9 @@
              <strong>Cast:</strong> Kavya, Bhargav<br>
              <strong>Direction Supervision:</strong> Eswar<br>
              <strong>Genres:</strong> Romance, Nature, Telugu Wedding Films`,
-	  tags: "Kavya, Bhargav, Romance, Love, bhaavyam, PreWedding, Invitation, Araku",
-	  section: "FriendFlix Originals "
+	  tags: "Kavya, Bhargav, Romance, Love, bhaavyam, PreWedding, Invitation, Araku, Nature, Vizag, pelli",
+	  section: "FriendFlix Originals ",
+	  status:"Recently added"
     },
     {
       src: "Videos/bgmi.mp4",
@@ -40,7 +41,7 @@
          With unexpected entries, playful banter, and moments straight out of a sitcom, this surprise edit captures the true spirit of the celebration.<br><br>
          <strong>Editor & Concept:</strong> Eswar<br>
          <strong>Genres:</strong> Comedy, Wedding, Real Moments`,
-  tags: "Pavan, Vaishnavi, wedding, 2025, fun, emotional, kavya, bhargav, eswar, edit, charan, leela, sowjanya, kranthi, durga rao, comedy",
+  tags: "Pavan, Vaishnavi, wedding, 2025, fun, emotional, kavya, bhargav, eswar, edit, charan, leela, sowjanya, kranthi, durga rao, comedy, pelli",
   section: "FriendFlix Originals"
 },
     {
@@ -56,7 +57,7 @@
          <strong>Edit & Surprise Concept:</strong> Eswar<br>
          <strong>Genres:</strong> Wedding, Emotion, Fun, Celebration`,
   tags: "Kavya, Bhargav, anniversary, wedding, edit, eswar, emotion, surprise, fun, song, comedy",
-  section: "FriendFlix Originals"
+  section: "Continue Watching For"
 },
     {
   src: "Videos/marryMe.mp4",
@@ -71,7 +72,7 @@
          <strong>Direction Supervision:</strong> Eswar<br>
          <strong>Genres:</strong> Pre-Wedding, Trend, Romance, Reel`,
   tags: "Kavya, Bhargav, prewedding, reel, trend, marry me, 2022, romance",
-  section: "FriendFlix Originals"
+  section: "Scenes from our story"
 }
   ]; 
   
@@ -91,7 +92,6 @@
   const searchResults = $("searchResults");
   const mainContent = $("mainContent");
   const userName = new URLSearchParams(window.location.search).get("user") || "User";
-  $("username").textContent = userName;
   document.getElementById("homeLink").href = `?user=${userName}`;
   let flag=false;
 
@@ -263,8 +263,20 @@ infoBtn.addEventListener("click", () => {
       const video = document.createElement("video");
       video.muted = true;
 
-      card.appendChild(img);
-      card.appendChild(video);
+      const title = document.createElement("div");
+	  title.className = "movie-title";
+	  title.textContent = item.title;
+	  
+	  const tag = document.createElement("div");
+	  tag.className = "tag";
+	  
+	  if(item.status){
+		tag.textContent = item.status;
+		card.append(img, video, title, tag);
+	  }else{
+		card.append(img, video, title);  
+	  }
+
       searchResults.appendChild(card);
 
       card.addEventListener("mouseenter", () => {
@@ -289,6 +301,8 @@ infoBtn.addEventListener("click", () => {
 
   searchInput.addEventListener("input", () => {
     const term = searchInput.value.trim().toLowerCase();
+	mainVideo.muted = true;
+	muteBtn.textContent ="🔇";
     if (term) {
       const matches = heroVideos.filter(item =>
         item.tags.toLowerCase().includes(term) ||
@@ -302,3 +316,89 @@ infoBtn.addEventListener("click", () => {
       mainContent.style.display = "block";
     }
   });
+  
+  const sectionContainer = document.getElementById("videoSections");
+
+function createMovieCard(item) {
+  const card = document.createElement("div");
+  card.className = "movie-card";
+  card.dataset.video = item.src;
+
+  const img = document.createElement("img");
+  img.src = item.image;
+  img.alt = item.title;
+
+  const video = document.createElement("video");
+  video.muted = true;
+
+  const title = document.createElement("div");
+  title.className = "movie-title";
+  title.textContent = item.title;
+  
+  const tag = document.createElement("div");
+  tag.className = "tag";
+  
+  if(item.status){
+	tag.textContent = item.status;
+    card.append(img, video, title, tag);
+  }else{
+	card.append(img, video, title);  
+  }
+  
+
+  card.onmouseenter = () => {
+    video.src = item.src;
+    video.load();
+    video.onloadedmetadata = () => {
+      video.currentTime = Math.random() * Math.max(0, video.duration - 10);
+      video.play();
+      setTimeout(() => video.pause(), 10000);
+    };
+  };
+  card.onmouseleave = () => {
+    video.pause();
+    video.currentTime = 0;
+  };
+  card.onclick = () => {
+    fullscreenVideo.src = item.src;
+    fullscreenPlayer.style.display = 'flex';
+    fullscreenVideo.play();
+    resumeInfoModal = false;
+  };
+
+  return card;
+}
+
+function renderDynamicSections(videos) {
+  const grouped = {};
+
+  videos.forEach(v => {
+    const key = v.section.trim();
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(v);
+  });
+
+  for (const sectionName in grouped) {
+    const title = document.createElement("h2");
+    title.className = sectionContainer.childNodes.length === 0
+      ? "first-section-title"
+      : "section-title";
+    title.innerHTML = sectionName.includes("Continue Watching For")
+  ? `${sectionName} <span id="username">${userName}</span>`
+  : sectionName;
+
+
+    const row = document.createElement("div");
+    row.className = "row";
+
+    grouped[sectionName].forEach(video => {
+      const card = createMovieCard(video);
+      row.appendChild(card);
+    });
+
+    sectionContainer.append(title, row);
+  }
+}
+
+// Call this function after DOM is ready
+renderDynamicSections(heroVideos);
