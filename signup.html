@@ -20,7 +20,7 @@
         <div id="phone-error" class="input-error">Please enter a valid phone number.</div>
         <input type="password" id="password" placeholder="Password" required />
         <div id="password-error" class="input-error">Your password must contain between 4 and 60 characters.</div>
-        <button type="submit">Register</button>
+        <button type="submit" class="submit">Register</button>
         <div class="divider">OR</div>
         <a href="index.html" class="forgot">Already have an account? Sign in</a>
         <div class="signup">
@@ -30,5 +30,12 @@
       </form>
     </div>
   </div>
+  <script>
+    document.querySelectorAll('.submit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        alert("⚠️ DataBase ledhamma.");
+      });
+    });
+  </script>
 </body>
 </html>
