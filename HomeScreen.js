@@ -296,21 +296,36 @@ function createMovieCard(item) {
 function bindMovieCardEvents(card) {
   const video = card.querySelector("video");
   const src = card.dataset.video;
+  const img = card.querySelector("img");
+  let previewTimeout;
 
   card.addEventListener("mouseenter", () => {
     video.src = src;
 	video.muted = true; 
     video.load();
+
+    img.style.display = "none";
+    video.style.display = "block";
+	
     video.onloadedmetadata = () => {
       video.currentTime = Math.random() * Math.max(0, video.duration - 10);
       video.play();
-      setTimeout(() => video.pause(), 10000);
+
+      previewTimeout = setTimeout(() => {
+        video.pause();
+        video.currentTime = 0;
+        video.style.display = "none";
+        img.style.display = "block";
+      }, 10000); // 10 seconds
     };
   });
 
   card.addEventListener("mouseleave", () => {
+    clearTimeout(previewTimeout); // 💥 clear timeout on early exit
     video.pause();
     video.currentTime = 0;
+    video.style.display = "none";
+    img.style.display = "block";
   });
 
   card.addEventListener("click", () => {
