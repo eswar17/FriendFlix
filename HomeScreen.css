@@ -171,3 +171,42 @@ nav a:hover { text-decoration: underline; }
 .row::-webkit-scrollbar {
   height: 0;
 }
+
+.movie-card .heart-wrapper {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 20;
+}
+
+.heart-icon {
+  position: relative;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 9px;
+  white-space: nowrap;
+  position: absolute;
+  bottom: -40px;
+  left: -120%;
+  transform: translateX(-50%);
+  transition: opacity 0.2s ease-in-out;
+  z-index: 1001;
+  pointer-events: none;
+}
+
+
+.heart-icon:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+

@@ -15,6 +15,8 @@
   const searchResults = $("searchResults");
   const mainContent = $("mainContent");
   const userName = new URLSearchParams(window.location.search).get("user") || "User";
+  let currentView = "home"; // Can be "home", "search", or "mylist"
+
   document.getElementById("homeLink").href = `?user=${userName}`;
   let flag=false;
 
@@ -164,81 +166,100 @@ infoBtn.addEventListener("click", () => {
   function renderSearchResults(results) {
     searchResults.innerHTML = "";
 	if (results.length === 0) {
-	  const noMatch = document.createElement("div");
-	  noMatch.style.color = "#aaa";
-	  noMatch.style.fontSize = "18px";
-	  noMatch.style.padding = "20px";
-	  noMatch.style.width = "100%";
-	  noMatch.style.textAlign = "center";
-	  noMatch.textContent = "No matches found.";
-	  searchResults.appendChild(noMatch);
+	  
+	  searchResults.innerHTML = `
+  <div style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 100px);
+    width: 100%;
+    color: #aaa;
+    font-size: 20px;
+    text-align: center;
+  ">
+    😶 No matches found.
+  </div>
+`;
+
 	  return;
-	}//movieData
-    results.forEach(item => {
-      const card = document.createElement("div");
-      card.className = "movie-card";
-      card.dataset.video = item.src;
+	}
+	results.forEach(item => {
+  const card = createMovieCard(item); // ❤️ this has heart logic
+  searchResults.appendChild(card);
+});
 
-      const img = document.createElement("img");
-      img.src = item.image;
-      img.alt = item.title;
-
-      const video = document.createElement("video");
-      video.muted = true;
-
-      const title = document.createElement("div");
-	  title.className = "movie-title";
-	  title.textContent = item.title;
-	  
-	  const tag = document.createElement("div");
-	  tag.className = "tag";
-	  
-	  if(item.status){
-		tag.textContent = item.status;
-		card.append(img, video, title, tag);
-	  }else{
-		card.append(img, video, title);  
-	  }
-
-      searchResults.appendChild(card);
-
-      card.addEventListener("mouseenter", () => {
-        video.src = item.src;
-        video.currentTime = 20;
-        video.play();
-        setTimeout(() => video.pause(), 10000);
-      });
-
-      card.addEventListener("mouseleave", () => {
-        video.pause();
-        video.currentTime = 0;
-      });
-
-      card.addEventListener("click", () => {
-        fullscreenVideo.src = item.src;
-        fullscreenPlayer.style.display = 'flex';
-        fullscreenVideo.play();
-      });
-    });
+	//movieData
+   // results.forEach(item => {
+   //   const card = document.createElement("div");
+   //   card.className = "movie-card";
+   //   card.dataset.video = item.src;
+   //
+   //   const img = document.createElement("img");
+   //   img.src = item.image;
+   //   img.alt = item.title;
+   //
+   //   const video = document.createElement("video");
+   //   video.muted = true;
+   //
+   //   const title = document.createElement("div");
+	//  title.className = "movie-title";
+	//  title.textContent = item.title;
+	//  
+	//  const tag = document.createElement("div");
+	//  tag.className = "tag";
+	//  
+	//  if(item.status){
+	//	tag.textContent = item.status;
+	//	card.append(img, video, title, tag);
+	//  }else{
+	//	card.append(img, video, title);  
+	//  }
+   //
+   //   searchResults.appendChild(card);
+   //
+   //   card.addEventListener("mouseenter", () => {
+   //     video.src = item.src;
+   //     video.currentTime = 20;
+   //     video.play();
+   //     setTimeout(() => video.pause(), 10000);
+   //   });
+   //
+   //   card.addEventListener("mouseleave", () => {
+   //     video.pause();
+   //     video.currentTime = 0;
+   //   });
+   //
+   //   card.addEventListener("click", () => {
+   //     fullscreenVideo.src = item.src;
+   //     fullscreenPlayer.style.display = 'flex';
+   //     fullscreenVideo.play();
+   //   });
+   // });
   }
 
-  searchInput.addEventListener("input", () => {
-    const term = searchInput.value.trim().toLowerCase();
-	mainVideo.muted = true;
-	muteBtn.textContent ="🔇";
-    if (term) {
-      const matches = heroVideos.filter(item =>
-        item.tags.toLowerCase().includes(term) ||
-        item.title.toLowerCase().includes(term)
-      );
-      mainContent.style.display = "none";
-      renderSearchResults(matches);
-      searchResults.classList.add("active");
-    } else {
-      searchResults.classList.remove("active");
-      mainContent.style.display = "block";
-    }
-  });
+searchInput.addEventListener("input", () => {
+  const term = searchInput.value.trim().toLowerCase();
+  mainVideo.muted = true;
+  muteBtn.textContent = "🔇";
+
+  // 🆕 SET VIEW
+  currentView = term ? "search" : "home";
+
+  if (term) {
+    const matches = heroVideos.filter(item =>
+      item.tags.toLowerCase().includes(term) ||
+      item.title.toLowerCase().includes(term)
+    );
+    mainContent.style.display = "none";
+    renderSearchResults(matches);
+    searchResults.classList.add("active");
+  } else {
+    searchResults.classList.remove("active");
+    mainContent.style.display = "block";
+  }
+});
+
   
   const sectionContainer = document.getElementById("videoSections");
 
@@ -257,41 +278,43 @@ function createMovieCard(item) {
   const title = document.createElement("div");
   title.className = "movie-title";
   title.textContent = item.title;
-  
+
   const tag = document.createElement("div");
   tag.className = "tag";
-  
-  if(item.status){
-	tag.textContent = item.status;
-    card.append(img, video, title, tag);
-  }else{
-	card.append(img, video, title);  
-  }
-  
+  if (item.status) tag.textContent = item.status;
 
-  card.onmouseenter = () => {
-    video.src = item.src;
-    video.load();
-    video.onloadedmetadata = () => {
-      video.currentTime = Math.random() * Math.max(0, video.duration - 10);
-      video.play();
-      setTimeout(() => video.pause(), 10000);
-    };
-  };
-  card.onmouseleave = () => {
-    video.pause();
-    video.currentTime = 0;
-  };
-  card.onclick = () => {
-    fullscreenVideo.src = item.src;
-    fullscreenPlayer.style.display = 'flex';
-    fullscreenVideo.play();
-    resumeInfoModal = false;
-  };
+  // ✅ Heart wrapper (for absolute positioning)
+  const heartWrapper = document.createElement("div");
+  heartWrapper.className = "heart-wrapper";
+
+  // ❤️ Heart icon with tooltip
+  const heart = document.createElement("div");
+  heart.className = "heart-icon";
+  heart.innerHTML = isInMyList(item.src) ? "❤️" : "🤍";
+
+  const tooltip = document.createElement("span");
+  tooltip.className = "tooltip-text";
+  tooltip.textContent = isInMyList(item.src) ? "Remove from My List" : "Add to My List";
+
+  heart.appendChild(tooltip);
+  heartWrapper.appendChild(heart);
+
+  // Events
+  heart.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleMyList(item, heart);
+  });
+
+  // Append elements
+  card.append(img, video, title);
+  if (item.status) card.appendChild(tag);
+  card.appendChild(heartWrapper);
 
   bindMovieCardEvents(card);
   return card;
 }
+
+
 
 function bindMovieCardEvents(card) {
   const video = card.querySelector("video");
@@ -335,19 +358,19 @@ function bindMovieCardEvents(card) {
   });
 }
 
-
 function cloneRowForLoop(row, minCards = 15) {
-  const originalCards = [...row.children];
+  const videoSrcs = [...row.children].map(card => card.dataset.video);
+  const videoObjs = videoSrcs.map(src => heroVideos.find(v => v.src === src));
 
   while (row.children.length < minCards) {
-    originalCards.forEach(original => {
-      const clone = original.cloneNode(true);
-      bindMovieCardEvents(clone); // 🔁 Add interactions to clone
-      row.appendChild(clone);
-    });
+    for (const videoObj of videoObjs) {
+      if (!videoObj) continue;
+      const freshCard = createMovieCard(videoObj); // ❤️ fresh card every time
+      row.appendChild(freshCard);
+      if (row.children.length >= minCards) break;
+    }
   }
 }
-
 
 function renderDynamicSections(videos) {
   const grouped = {};
@@ -525,3 +548,120 @@ function renderFilteredSection(section) {
 
 // 4️⃣ Call this on page load
 setupTvShowsDropdown();
+
+function getMyList() {
+  return JSON.parse(localStorage.getItem("myList") || "[]");
+}
+
+function saveMyList(list) {
+  localStorage.setItem("myList", JSON.stringify(list));
+}
+
+function isInMyList(src) {
+  return getMyList().some(video => video.src === src);
+}
+
+function toggleMyList(videoItem, clickedHeart) {
+  let list = getMyList();
+  const index = list.findIndex(v => v.src === videoItem.src);
+  const inList = index > -1;
+
+  if (inList) {
+    list.splice(index, 1);
+    saveMyList(list);
+  } else {
+    list.push(videoItem);
+    saveMyList(list);
+  }
+
+document.querySelectorAll(`.movie-card[data-video="${videoItem.src}"] .heart-icon`).forEach(heart => {
+  const isSaved = isInMyList(videoItem.src);
+  heart.innerHTML = isSaved ? "❤️" : "🤍";
+
+  const tooltip = document.createElement("span");
+  tooltip.className = "tooltip-text";
+  tooltip.textContent = isSaved ? "Remove from My List" : "Add to My List";
+  heart.appendChild(tooltip);
+});
+
+
+  // ✨ Extra logic: if current view is My List, remove card from DOM
+if (currentView === "mylist") {
+    const card = clickedHeart.closest(".movie-card");
+    if (card && !isInMyList(videoItem.src)) {
+      card.remove();
+    }
+	// 🧼 Check if My List is empty after removal
+if (getMyList().length === 0 && document.getElementById("searchResults").classList.contains("active")) {
+  searchResults.innerHTML = `
+  <div style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 100px);
+    width: 100%;
+    color: #aaa;
+    font-size: 20px;
+    text-align: center;
+  ">
+    😶 Your list is empty!
+  </div>
+`;
+
+}
+
+  }
+}
+
+
+document.getElementById("myListLink").addEventListener("click", (e) => {
+  e.preventDefault();
+  currentView = "mylist";
+  const saved = getMyList();
+
+  mainContent.style.display = "none";
+  searchResults.innerHTML = "";
+  searchResults.classList.add("active");
+
+  const wrapper = document.createElement("div");
+  wrapper.style.padding = "30px";
+
+  const header = document.createElement("h2");
+  header.textContent = `❤️ Your Saved Videos`;
+  header.style.color = "white";
+  header.style.fontSize = "24px";
+  header.style.marginBottom = "20px";
+
+  const row = document.createElement("div");
+  row.className = "row";
+
+  saved.forEach(item => {
+    const card = createMovieCard(item);
+    row.appendChild(card);
+  });
+
+if (saved.length === 0) {
+  const noItem = document.createElement("div");
+
+  Object.assign(noItem.style, {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    color: "#aaa",
+    fontSize: "20px",
+    textAlign: "center",
+    zIndex: "10"
+  });
+
+  noItem.textContent = "😶 Your list is empty!";
+  wrapper.appendChild(noItem);
+} else {
+  wrapper.appendChild(header);
+  wrapper.appendChild(row);
+}
+
+
+  searchResults.appendChild(wrapper);
+});
+
