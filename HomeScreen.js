@@ -289,27 +289,97 @@ function createMovieCard(item) {
     resumeInfoModal = false;
   };
 
+  bindMovieCardEvents(card);
   return card;
 }
+
+function bindMovieCardEvents(card) {
+  const video = card.querySelector("video");
+  const src = card.dataset.video;
+
+  card.addEventListener("mouseenter", () => {
+    video.src = src;
+	video.muted = true; 
+    video.load();
+    video.onloadedmetadata = () => {
+      video.currentTime = Math.random() * Math.max(0, video.duration - 10);
+      video.play();
+      setTimeout(() => video.pause(), 10000);
+    };
+  });
+
+  card.addEventListener("mouseleave", () => {
+    video.pause();
+    video.currentTime = 0;
+  });
+
+  card.addEventListener("click", () => {
+    fullscreenVideo.src = src;
+    fullscreenPlayer.style.display = 'flex';
+    fullscreenVideo.play();
+  });
+}
+
+
+function cloneRowForLoop(row, minCards = 15) {
+  const originalCards = [...row.children];
+
+  while (row.children.length < minCards) {
+    originalCards.forEach(original => {
+      const clone = original.cloneNode(true);
+      bindMovieCardEvents(clone); // 🔁 Add interactions to clone
+      row.appendChild(clone);
+    });
+  }
+}
+
 
 function renderDynamicSections(videos) {
   const grouped = {};
 
+  // Group videos by section
   videos.forEach(v => {
-    const key = v.section.trim();
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(v);
+    v.section.split(',').forEach(section => {
+      const key = section.trim();
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(v);
+    });
   });
 
+  // 1️⃣ Render FriendFlix Originals First (if exists)
+  if (grouped["FriendFlix Originals"]) {
+    const title = document.createElement("h2");
+    title.className = "first-section-title";
+    title.textContent = "FriendFlix Originals";
+    const row = document.createElement("div");
+    row.className = "row";
+    grouped["FriendFlix Originals"].forEach(video => {
+      const card = createMovieCard(video);
+      row.appendChild(card);
+    });
+    cloneRowForLoop(row);
+    sectionContainer.append(title, row);
+    delete grouped["FriendFlix Originals"]; // Remove it to avoid re-rendering
+  }
+
+  // 2️⃣ Continue Watching Section (Always second)
+  const continueTitle = document.createElement("h2");
+  continueTitle.className = "section-title";
+  continueTitle.innerHTML = `Continue Watching For <span id="username">${userName}</span>`;
+  const continueRow = document.createElement("div");
+  continueRow.className = "row";
+  continueWatchingList.forEach(video => {
+    const card = createMovieCard(video);
+    continueRow.appendChild(card);
+  });
+  cloneRowForLoop(continueRow);
+  sectionContainer.append(continueTitle, continueRow);
+
+  // 3️⃣ Remaining sections
   for (const sectionName in grouped) {
     const title = document.createElement("h2");
-    title.className = sectionContainer.childNodes.length === 0
-      ? "first-section-title"
-      : "section-title";
-    title.innerHTML = sectionName.includes("Continue Watching For")
-  ? `${sectionName} <span id="username">${userName}</span>`
-  : sectionName;
-
+    title.className = "section-title";
+    title.textContent = sectionName;
 
     const row = document.createElement("div");
     row.className = "row";
@@ -318,10 +388,15 @@ function renderDynamicSections(videos) {
       const card = createMovieCard(video);
       row.appendChild(card);
     });
-
+    cloneRowForLoop(row);
     sectionContainer.append(title, row);
   }
 }
+
+
+const continueWatchingList = [...heroVideos]
+  .sort(() => 0.5 - Math.random())
+  .slice(0, 9);
 
 // Call this function after DOM is ready
 renderDynamicSections(heroVideos);

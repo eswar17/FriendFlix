@@ -163,3 +163,11 @@ nav a:hover { text-decoration: underline; }
   background-color: black; z-index: 1000;
   min-height: calc(100vh - 70px); overflow-y: auto;
 }
+.row {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+}
+.row::-webkit-scrollbar {
+  height: 0;
+}
