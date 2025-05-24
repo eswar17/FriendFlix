@@ -415,3 +415,113 @@ const continueWatchingList = [...heroVideos]
 
 // Call this function after DOM is ready
 renderDynamicSections(heroVideos);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// =======================
+// TV SHOWS DROPDOWN SETUP
+// =======================
+
+// 1️⃣ Get unique section names from heroVideos
+function getUniqueSections(videos) {
+  const sectionSet = new Set();
+  videos.forEach(v => {
+    v.section.split(',').forEach(s => sectionSet.add(s.trim()));
+  });
+  return Array.from(sectionSet);
+}
+
+// 2️⃣ Create dropdown and inject into TV Shows nav item
+function setupTvShowsDropdown() {
+  const tvLink = document.querySelector('nav a:nth-child(2)'); // TV Shows link
+
+  const dropdown = document.createElement('div');
+  dropdown.id = "tvDropdown";
+  dropdown.style.position = "fixed";
+  dropdown.style.top = "50px";
+  dropdown.style.left = tvLink.getBoundingClientRect().left + 'px';
+  dropdown.style.background = "#111";
+  dropdown.style.border = "1px solid #444";
+  dropdown.style.padding = "10px";
+  dropdown.style.borderRadius = "6px";
+  dropdown.style.display = "none";
+  dropdown.style.zIndex = 999;
+
+  const sections = getUniqueSections(heroVideos);
+  sections.forEach(section => {
+    const item = document.createElement("div");
+    item.textContent = section;
+    item.style.color = "white";
+    item.style.padding = "5px 10px";
+    item.style.cursor = "pointer";
+    item.addEventListener("click", () => {
+      renderFilteredSection(section);
+      dropdown.style.display = "none";
+    });
+    item.addEventListener("mouseenter", () => {
+      item.style.background = "#222";
+    });
+    item.addEventListener("mouseleave", () => {
+      item.style.background = "transparent";
+    });
+    dropdown.appendChild(item);
+  });
+
+  document.body.appendChild(dropdown);
+
+tvLink.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  // Forcefully bring dropdown to correct position and above everything
+  const rect = tvLink.getBoundingClientRect();
+  dropdown.style.position = "fixed";
+  dropdown.style.left = rect.left + "px";
+  dropdown.style.top = rect.bottom + 5 + "px";
+  dropdown.style.zIndex = 10001; // higher than searchResults
+
+  // Toggle visibility
+  dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+});
+
+
+  // Optional: click outside to close
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target) && e.target !== tvLink) {
+      dropdown.style.display = "none";
+    }
+  });
+}
+
+// 3️⃣ Render section-specific cards like search results
+function renderFilteredSection(section) {
+  const matched = heroVideos.filter(v => v.section.includes(section));
+
+  mainContent.style.display = "none";
+  searchResults.innerHTML = "";
+  searchResults.classList.add("active");
+
+  const wrapper = document.createElement("div");
+  wrapper.style.padding = "30px";
+
+  const header = document.createElement("h2");
+  header.textContent = `🎬TV Shows under “${section}”`;
+  header.style.color = "white";
+  header.style.fontSize = "24px";
+  header.style.marginBottom = "20px";
+
+  const row = document.createElement("div");
+  row.className = "row"; // will use your existing row CSS
+
+  matched.forEach(item => {
+    const card = createMovieCard(item);
+    row.appendChild(card);
+  });
+
+  wrapper.appendChild(header);
+  wrapper.appendChild(row);
+  searchResults.appendChild(wrapper);
+}
+
+
+// 4️⃣ Call this on page load
+setupTvShowsDropdown();
