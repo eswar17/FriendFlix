@@ -1,3 +1,11 @@
+const moviesArr = [
+  { key: "Pavan Marriage", value: "xQsmfcAW8mQ" },
+  { key: "Luca Telugu Trailer", value: "sQ23XPNKQNw" }
+];
+
+
+
+
 const heroVideos = [{
         src: "Videos/pavanPelliHighlights.mp4",
         title: "Pavan Pelli Highlights",

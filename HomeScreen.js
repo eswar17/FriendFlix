@@ -188,54 +188,6 @@ infoBtn.addEventListener("click", () => {
   const card = createMovieCard(item); // ❤️ this has heart logic
   searchResults.appendChild(card);
 });
-
-	//movieData
-   // results.forEach(item => {
-   //   const card = document.createElement("div");
-   //   card.className = "movie-card";
-   //   card.dataset.video = item.src;
-   //
-   //   const img = document.createElement("img");
-   //   img.src = item.image;
-   //   img.alt = item.title;
-   //
-   //   const video = document.createElement("video");
-   //   video.muted = true;
-   //
-   //   const title = document.createElement("div");
-	//  title.className = "movie-title";
-	//  title.textContent = item.title;
-	//  
-	//  const tag = document.createElement("div");
-	//  tag.className = "tag";
-	//  
-	//  if(item.status){
-	//	tag.textContent = item.status;
-	//	card.append(img, video, title, tag);
-	//  }else{
-	//	card.append(img, video, title);  
-	//  }
-   //
-   //   searchResults.appendChild(card);
-   //
-   //   card.addEventListener("mouseenter", () => {
-   //     video.src = item.src;
-   //     video.currentTime = 20;
-   //     video.play();
-   //     setTimeout(() => video.pause(), 10000);
-   //   });
-   //
-   //   card.addEventListener("mouseleave", () => {
-   //     video.pause();
-   //     video.currentTime = 0;
-   //   });
-   //
-   //   card.addEventListener("click", () => {
-   //     fullscreenVideo.src = item.src;
-   //     fullscreenPlayer.style.display = 'flex';
-   //     fullscreenVideo.play();
-   //   });
-   // });
   }
 
 searchInput.addEventListener("input", () => {
@@ -665,3 +617,113 @@ if (saved.length === 0) {
   searchResults.appendChild(wrapper);
 });
 
+function setupMoviesDropdown() {
+  const moviesLink = document.querySelector('nav a:nth-child(3)'); // Movies link
+
+  const dropdown = document.createElement('div');
+  dropdown.id = "moviesDropdown";
+  dropdown.style.position = "fixed";
+  dropdown.style.top = "50px";
+  dropdown.style.left = moviesLink.getBoundingClientRect().left + 'px';
+  dropdown.style.background = "#111";
+  dropdown.style.border = "1px solid #444";
+  dropdown.style.padding = "10px";
+  dropdown.style.borderRadius = "6px";
+  dropdown.style.display = "none";
+  dropdown.style.zIndex = 999;
+
+  // Loop through moviesArr and create items
+  moviesArr.forEach(({ key, value }) => {
+    const item = document.createElement("div");
+    item.textContent = key;
+    item.style.color = "white";
+    item.style.padding = "5px 10px";
+    item.style.cursor = "pointer";
+
+    item.addEventListener("click", () => {
+      renderYoutubeVideo(value, key);
+      dropdown.style.display = "none";
+    });
+
+    item.addEventListener("mouseenter", () => item.style.background = "#222");
+    item.addEventListener("mouseleave", () => item.style.background = "transparent");
+
+    dropdown.appendChild(item);
+  });
+
+  document.body.appendChild(dropdown);
+
+  moviesLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    const rect = moviesLink.getBoundingClientRect();
+    dropdown.style.left = rect.left + "px";
+    dropdown.style.top = rect.bottom + 5 + "px";
+    dropdown.style.zIndex = 10001;
+    dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target) && e.target !== moviesLink) {
+      dropdown.style.display = "none";
+    }
+  });
+}
+
+
+function renderYoutubeVideo(videoId, titleText) {
+  mainContent.style.display = "none";
+  searchResults.innerHTML = "";
+  searchResults.classList.add("active");
+
+  const wrapper = document.createElement("div");
+  wrapper.style.position = "fixed";
+  wrapper.style.top = "0";
+  wrapper.style.left = "0";
+  wrapper.style.width = "100vw";
+  wrapper.style.height = "100vh";
+  wrapper.style.backgroundColor = "#000";
+  wrapper.style.zIndex = "9999";
+  wrapper.style.display = "flex";
+  wrapper.style.justifyContent = "center";
+  wrapper.style.alignItems = "center";
+  wrapper.style.flexDirection = "column";
+
+  const header = document.createElement("h2");
+  header.textContent = titleText;
+  header.style.color = "white";
+  header.style.marginBottom = "20px";
+  header.style.fontSize = "24px";
+  header.style.textAlign = "center";
+
+  const iframe = document.createElement("iframe");
+  iframe.width = "100%";
+  iframe.height = "100%";
+  iframe.style.maxWidth = "100%";
+  iframe.style.maxHeight = "100%";
+  iframe.style.border = "none";
+  iframe.allowFullscreen = true;
+  iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+
+  const backBtn = document.createElement("button");
+  backBtn.textContent = "← Back";
+  backBtn.style.position = "absolute";
+  backBtn.style.top = "20px";
+  backBtn.style.left = "30px";
+  backBtn.style.fontSize = "18px";
+  backBtn.style.padding = "8px 16px";
+  backBtn.style.cursor = "pointer";
+  backBtn.style.zIndex = "10000";
+
+  backBtn.onclick = () => {
+    wrapper.remove();
+    searchResults.classList.remove("active");
+    mainContent.style.display = "block";
+  };
+
+  wrapper.appendChild(backBtn);
+  wrapper.appendChild(iframe);
+  document.body.appendChild(wrapper);
+}
+
+
+setupMoviesDropdown();
