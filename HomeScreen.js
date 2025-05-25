@@ -192,8 +192,7 @@ infoBtn.addEventListener("click", () => {
 
 searchInput.addEventListener("input", () => {
   const term = searchInput.value.trim().toLowerCase();
-  mainVideo.muted = true;
-  muteBtn.textContent = "🔇";
+  muteMainVideo();
 
   // 🆕 SET VIEW
   currentView = term ? "search" : "home";
@@ -430,6 +429,7 @@ function setupTvShowsDropdown() {
     item.style.padding = "5px 10px";
     item.style.cursor = "pointer";
     item.addEventListener("click", () => {
+	  muteMainVideo();
       renderFilteredSection(section);
       dropdown.style.display = "none";
     });
@@ -567,6 +567,7 @@ if (getMyList().length === 0 && document.getElementById("searchResults").classLi
 
 
 document.getElementById("myListLink").addEventListener("click", (e) => {
+  muteMainVideo();
   e.preventDefault();
   currentView = "mylist";
   const saved = getMyList();
@@ -641,6 +642,7 @@ function setupMoviesDropdown() {
     item.style.cursor = "pointer";
 
     item.addEventListener("click", () => {
+      muteMainVideo();
       renderYoutubeVideo(value, key);
       dropdown.style.display = "none";
     });
@@ -726,4 +728,10 @@ function renderYoutubeVideo(videoId, titleText) {
 }
 
 
-setupMoviesDropdown();
+setupMoviesDropdown();.
+
+
+function muteMainVideo() {
+  mainVideo.muted = true;
+  muteBtn.textContent = "🔇";
+}
