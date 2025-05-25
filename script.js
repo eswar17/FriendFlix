@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = `ProfileScreen.html?user=${encodeURIComponent(email)}`;
+      window.location.href = `ProfileScreen.html`;
     } catch (err) {
       emailHighlight.textContent = email;
       credentialError.style.display = "block";
