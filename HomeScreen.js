@@ -728,7 +728,7 @@ function renderYoutubeVideo(videoId, titleText) {
 }
 
 
-setupMoviesDropdown();.
+setupMoviesDropdown();
 
 
 function muteMainVideo() {
