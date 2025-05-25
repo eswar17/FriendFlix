@@ -17,8 +17,8 @@
       <form class="login-box" id="signupForm">
         <h2>Sign Up</h2>
         <div id="signup-status" class="input-error" style="display: none;"></div>
-        <input type="text" id="phone" placeholder="Phone number" required />
-        <div id="phone-error" class="input-error">Please enter a valid phone number.</div>
+		<input type="text" id="email" placeholder="Email address" required />
+		<div id="email-error" class="input-error">Please enter a valid email address.</div>
         <input type="password" id="password" placeholder="Password" required />
         <div id="password-error" class="input-error">Your password must contain between 4 and 60 characters.</div>
         <button type="submit" class="submit">Register</button>
@@ -31,12 +31,5 @@
       </form>
     </div>
   </div>
-  <script>
-    document.querySelectorAll('.submit').forEach(btn => {
-      btn.addEventListener('click', () => {
-        alert("⚠️ DataBase ledhamma.");
-      });
-    });
-  </script>
 </body>
 </html>
