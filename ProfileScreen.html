@@ -113,7 +113,7 @@
           <div class="profile-name">${name}</div>
         `;
         div.onclick = () => {
-          window.location.href = `HomeScreen.html?user=${encodeURIComponent(email)}&profile=${encodeURIComponent(name)}`;
+          window.location.href = `HomeScreen.html?user=${encodeURIComponent(name)}`;
         };
         profilesContainer.appendChild(div);
       });

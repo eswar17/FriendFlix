@@ -23,7 +23,6 @@ let uid = null;
 let profileRef = null;
 let activeAvatarPicker = null;
 let chooseAvatarText = null;
-let borderAnimation = null;
 
 const avatars = [
   "Profiles/red.jpg",
@@ -39,7 +38,6 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "index.html";
     return;
   }
-
   uid = user.uid;
   profileRef = collection(db, "users", uid, "profiles");
   await loadProfiles();
@@ -51,7 +49,14 @@ async function loadProfiles() {
   chooseProfileIcons.innerHTML = "";
   profileIcons.innerHTML = "";
 
+  // 👉 Show loading text
+  profileGrid.innerHTML = `<div id="loading" style="color: #aaa; font-size: 20px; margin-bottom: 20px;">Loading profiles...</div>`;
+
   const snapshot = await getDocs(profileRef);
+
+  // 👉 Remove loading after fetch
+  profileGrid.innerHTML = "";
+
   snapshot.forEach(docSnap => {
     const data = docSnap.data();
     localProfiles.push({
@@ -63,44 +68,6 @@ async function loadProfiles() {
   });
 
   renderProfiles();
-}
-
-function renderAvatarSelector(targetProfile) {
-  const existing = document.getElementById("avatarSelector");
-  if (existing) existing.remove(); // only one open at a time
-
-  const row = document.createElement("div");
-  row.id = "avatarSelector";
-  row.className = "avatar-selector-row";
-
-  avatars.forEach(avatar => {
-    const img = document.createElement("img");
-    img.src = avatar;
-    img.className = "avatar-option";
-    if (avatar === targetProfile.avatar) {
-      img.classList.add("selected");
-    }
-
-    img.addEventListener("click", () => {
-      targetProfile.avatar = avatar;
-      if (targetProfile.action !== "add") {
-        targetProfile.action = "update";
-      }
-      renderProfiles(); // redraw to reflect updated avatar
-      renderAvatarSelector(targetProfile); // reopen the selector under the same profile
-    });
-
-    row.appendChild(img);
-  });
-  const avatarPicker = document.querySelector(".avatar-picker");
-if (avatarPicker.scrollWidth <= avatarPicker.clientWidth) {
-  avatarPicker.classList.add("no-scroll");
-} else {
-  avatarPicker.classList.remove("no-scroll");
-}
-
-
-  targetProfile.element.after(row); // 🧠 Insert below current profile box
 }
 
 
@@ -116,7 +83,7 @@ function renderProfiles() {
       <div class="profile-img-wrapper">
         <img src="${p.avatar}" class="profile-img" />
         <img src="Icons/Edit.png" class="edit-icon" title="Edit Name" />
-        <div class="delete-icon" title="Delete Profile">🗑️</div>
+        <img src="Icons/bin.png" class="delete-icon" title="Delete Profile"></img>
         <div class="change-avatar-btn">Change Profile Icon</div>
       </div>
       <div class="profile-name-wrapper">
@@ -136,6 +103,7 @@ function renderProfiles() {
       input.classList.add("editing");
       input.focus();
     };
+
     input.addEventListener("blur", () => {
       input.readOnly = true;
       input.classList.remove("editing");
@@ -151,34 +119,29 @@ function renderProfiles() {
     };
 
     profileGrid.appendChild(div);
-	p.element = div; // ✅ Save element reference for avatar selector
+    p.element = div;
   });
 }
 
 function showAvatarPicker(profileId, parentDiv) {
-  // ❌ Remove previous avatar picker and highlight
   if (activeAvatarPicker) activeAvatarPicker.remove();
   if (chooseAvatarText) chooseAvatarText.remove();
 
   document.querySelectorAll('.profile-box').forEach(box => {
     box.style.transform = "scale(1)";
-    const img = box.querySelector('.profile-img');
-    img.classList.remove("glow-highlight");
+    box.querySelector('.profile-img')?.classList.remove("glow-highlight");
   });
 
-  // 🌟 Highlight current profile
   const profileBox = document.querySelector(`.profile-box[data-id="${profileId}"]`);
   profileBox.style.transform = "scale(1.1)";
-  const glowingImg = profileBox.querySelector('.profile-img');
-  glowingImg.classList.add("glow-highlight");
+  profileBox.querySelector('.profile-img').classList.add("glow-highlight");
 
-  // 🏷️ Create "Choose Profile Icon" label
   const chooseAvatar = document.createElement("div");
   chooseAvatar.className = "choose-avatar";
   chooseAvatar.textContent = "Choose Profile Icon:";
   chooseAvatar.style.display = "block";
+  chooseAvatarText = chooseAvatar;
 
-  // 🖼️ Create scrollable row of avatars
   const picker = document.createElement("div");
   picker.className = "avatar-picker";
 
@@ -196,22 +159,17 @@ function showAvatarPicker(profileId, parentDiv) {
     img.onclick = () => {
       currentProfile.avatar = avatar;
       if (currentProfile.action !== "add") currentProfile.action = "update";
-      renderProfiles(); // refresh profiles
-      showAvatarPicker(profileId, parentDiv); // reattach avatar picker to same profile
+      renderProfiles();
+      showAvatarPicker(profileId, parentDiv);
     };
 
     picker.appendChild(img);
   });
 
-  // 📌 Append to UI
   chooseProfileIcons.appendChild(chooseAvatar);
   profileIcons.appendChild(picker);
-
   activeAvatarPicker = picker;
-  chooseAvatarText = chooseAvatar;
 }
-
-
 
 addBtn.addEventListener("click", () => {
   const activeCount = localProfiles.filter(p => p.action !== "delete").length;
@@ -239,19 +197,21 @@ addBtn.addEventListener("click", () => {
 });
 
 doneBtn.addEventListener("click", async () => {
+  // 🔄 Update local profile names from DOM
   document.querySelectorAll(".profile-box").forEach(box => {
     const input = box.querySelector(".profile-name-input");
     const id = box.getAttribute("data-id");
     const profile = localProfiles.find(p => p.id === id);
-    if (profile && !input.readOnly) {
+    if (profile) {
       const newName = input.value.trim();
-      profile.name = newName;
-      if (profile.action !== "add") {
-        profile.action = "update";
+      if (newName !== profile.name) {
+        profile.name = newName;
+        if (profile.action !== "add") profile.action = "update";
       }
     }
   });
 
+  // ❌ Duplicate name check
   const namesSeen = new Set();
   for (const p of localProfiles.filter(p => p.action !== "delete")) {
     const key = p.name.toLowerCase();
@@ -262,30 +222,35 @@ doneBtn.addEventListener("click", async () => {
     namesSeen.add(key);
   }
 
-  for (const p of localProfiles) {
+  // ⏳ Show saving feedback
+  doneBtn.disabled = true;
+  doneBtn.textContent = "Saving...";
+
+  // 🚀 Batch all DB actions in parallel
+  const tasks = localProfiles.map(p => {
     if (p.action === "add" && p.name) {
-      await addDoc(profileRef, {
+      return addDoc(profileRef, {
         name: p.name,
         avatar: p.avatar,
         createdAt: new Date()
       });
     } else if (p.action === "update" && p.name) {
-      await updateDoc(doc(profileRef, p.id), {
+      return updateDoc(doc(profileRef, p.id), {
         name: p.name,
         avatar: p.avatar
       });
     } else if (p.action === "delete") {
-      await deleteDoc(doc(profileRef, p.id));
+      return deleteDoc(doc(profileRef, p.id));
+    } else {
+      return Promise.resolve(); // No action
     }
-  }
+  });
+
+  await Promise.all(tasks); // ✅ Wait for all to complete
 
   window.location.href = "ProfileScreen.html";
 });
 
-logoutBtn.addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "index.html";
-});
 
 function showLimitBanner(message) {
   const banner = document.getElementById("limit-banner");
