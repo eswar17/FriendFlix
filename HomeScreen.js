@@ -1,11 +1,3 @@
-import { auth } from './firebase.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = 'index.html';
-  }
-});
 
   const $ = id => document.getElementById(id);
   const mainVideo = $("mainVideo");
@@ -743,3 +735,66 @@ function muteMainVideo() {
   mainVideo.muted = true;
   muteBtn.textContent = "🔇";
 }
+
+import { db, auth } from './firebase.js';
+import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const profileDropdown = document.getElementById("profileDropdown");
+const profileMenu = document.getElementById("profileMenu");
+const activeProfileIcon = document.getElementById("activeProfileIcon");
+const userParam = new URLSearchParams(window.location.search).get("user") || "User";
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
+
+  const uid = user.uid;
+  const ref = collection(db, "users", uid, "profiles");
+  const snapshot = await getDocs(ref);
+
+  const profiles = [];
+  snapshot.forEach(doc => {
+    profiles.push(doc.data());
+  });
+
+  // 🔥 Find the current profile based on URL ?user=
+  const active = profiles.find(p => p.name.toLowerCase() === userParam.toLowerCase());
+
+  if (active) {
+    activeProfileIcon.src = active.avatar;
+  } else {
+    activeProfileIcon.src = "Icons/default.png"; // fallback if not found
+  }
+
+  // ✅ Populate other profiles into dropdown
+  profileMenu.querySelectorAll(".profile-option").forEach(e => e.remove());
+  profiles.forEach(p => {
+    if (p.name.toLowerCase() === userParam.toLowerCase()) return;
+    const option = document.createElement("div");
+    option.className = "profile-option";
+    option.innerHTML = `<img src="${p.avatar}" /><span>${p.name}</span>`;
+    option.onclick = () => {
+      window.location.href = `HomeScreen.html?user=${encodeURIComponent(p.name)}`;
+    };
+    profileMenu.insertBefore(option, profileMenu.querySelector(".divider"));
+  });
+});
+
+
+// Toggle menu
+activeProfileIcon.addEventListener("click", () => {
+  profileMenu.classList.toggle("show");
+});
+
+// Hide menu when clicking outside
+document.addEventListener("click", (e) => {
+  if (!profileDropdown.contains(e.target)) {
+    profileMenu.classList.remove("show");
+  }
+});
+
+// Sign out
+document.getElementById("signOutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+});

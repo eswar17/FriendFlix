@@ -19,10 +19,21 @@
       <a href="#">Movies</a>
       <a href="#" id="myListLink">My List</a>
     </nav></div>
+	<div style="display:flex">
 	<div class="search-box">
 	  <span class="search-icon">🔍</span>
       <input type="text" id="searchInput" placeholder="Titles,people,genres..." />
     </div>
+	<div class="profile-dropdown" id="profileDropdown">
+   <img id="activeProfileIcon" class="active-profile-icon" src="Icons/red.png" alt="Profile" />
+  <div class="dropdown-menu" id="profileMenu">
+    <!-- Profiles from Firebase will go here -->
+    <div class="divider"></div>
+    <div class="signout-item" id="signOutBtn">Sign out of FriendFlix</div>
+  </div>
+</div>
+</div>
+
   </header>
 <div class="main-content" id="mainContent">
 <div class="main-video-container" id="mainContainer">
@@ -62,6 +73,7 @@
   </div>
    <div id="moreInfoBackdrop"></div>
  </div>  
+   
 <div class="search-results" id="searchResults"></div>
   <div class="fullscreen-player" id="fullscreenPlayer">
     <button id="exitFullscreen" style="position: absolute; top: 20px; left: 30px; font-size: 30px; background: transparent; border: none; color: white; z-index: 9999; cursor: pointer;">←</button>
