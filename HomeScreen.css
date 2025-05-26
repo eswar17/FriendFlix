@@ -240,7 +240,7 @@ nav a:hover { text-decoration: underline; }
   display: none;
   position: absolute;
   right: 0;
-  top: 45px;
+  top: 100%;
   background: #111;
   padding: 10px 0;
   border-radius: 6px;
@@ -288,6 +288,30 @@ nav a:hover { text-decoration: underline; }
 .signout-item:hover {
   background: #222;
 }
+.dropdown-arrow {
+  font-size: 20px;
+  color: white;
+  opacity: 0.7;
+  transition: transform 0.3s ease;
+}
 
+.profile-dropdown:hover .dropdown-arrow {
+  transform: rotate(180deg); /* Optional: rotate arrow on hover */
+}
+
+.profile-dropdown {
+  display: relative;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  gap: 6px;
+}
+
+.active-profile-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  object-fit: cover;
+}
 
 

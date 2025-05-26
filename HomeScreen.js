@@ -802,17 +802,15 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 
-// Toggle menu
-activeProfileIcon.addEventListener("click", () => {
-  profileMenu.classList.toggle("show");
+profileDropdown.addEventListener("mouseenter", () => {
+  profileMenu.classList.add("show");
 });
 
-// Hide menu when clicking outside
-document.addEventListener("click", (e) => {
-  if (!profileDropdown.contains(e.target)) {
-    profileMenu.classList.remove("show");
-  }
+profileDropdown.addEventListener("mouseleave", () => {
+  profileMenu.classList.remove("show");
 });
+
+
 
 // Sign out
 document.getElementById("signOutBtn").addEventListener("click", async () => {
