@@ -18,28 +18,23 @@
       height: 100vh;
       margin: 0;
     }
-
     h1 {
       font-size: 3rem;
       margin-bottom: 40px;
     }
-
     .profiles {
       display: flex;
       gap: 40px;
       margin-bottom: 40px;
     }
-
     .profile {
       text-align: center;
       cursor: pointer;
       transition: transform 0.3s ease;
     }
-
     .profile:hover {
       transform: scale(1.1);
     }
-
     .profile img {
       width: 120px;
       height: 120px;
@@ -47,12 +42,10 @@
       border: 3px solid transparent;
       object-fit: cover;
     }
-
     .profile-name {
       margin-top: 10px;
       font-size: 1.2rem;
     }
-
     .manage-btn {
       background: transparent;
       border: 1px solid #888;
@@ -61,7 +54,6 @@
       font-size: 1rem;
       cursor: pointer;
     }
-
     .manage-btn:hover {
       color: white;
       border-color: white;
@@ -72,39 +64,85 @@
 <body>
 
   <h1>Who's watching?</h1>
-
-  <div class="profiles">
-    <div class="profile">
-      <img src="Profiles/red.jpg" alt="Bhargav" />
-      <div class="profile-name">Bhargav</div>
-    </div>
-    <div class="profile">
-      <img src="Profiles/blue.jpg" alt="Charan" />
-      <div class="profile-name">Charan</div>
-    </div>
-    <div class="profile">
-      <img src="Profiles/yellow.jpg" alt="Eswar" />
-      <div class="profile-name">Eswar</div>
-    </div>
-    <div class="profile">
-      <img src="Profiles/green.jpg" alt="Pavan" />
-      <div class="profile-name">Pavan</div>
-    </div>
-  </div>
-
+  <div class="profiles" id="profilesContainer">Loading...</div>
   <button class="manage-btn">Manage Profiles</button>
-<script>
-  document.querySelectorAll('.profile').forEach(profile => {
-    profile.addEventListener('click', () => {
-      const name = profile.querySelector('.profile-name').textContent.trim();
-      window.location.href = `HomeScreen.html?user=${encodeURIComponent(name)}`;
+
+  <script type="module">
+    import { auth, db } from './firebase.js';
+    import {
+      collection, addDoc, getDocs
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import {
+      signOut, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const profilesContainer = document.getElementById("profilesContainer");
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const uid = user.uid;
+      const email = user.email;
+      const profileRef = collection(db, "users", uid, "profiles");
+      const snap = await getDocs(profileRef);
+
+      if (snap.empty) {
+        const defaults = [
+          { name: "Eswar", avatar: "Profiles/yellow.jpg" },
+          { name: "Bhargav", avatar: "Profiles/red.jpg" },
+          { name: "Charan", avatar: "Profiles/blue.jpg" },
+          { name: "Pavan", avatar: "Profiles/green.jpg" }
+        ];
+        for (const p of defaults) {
+          await addDoc(profileRef, { ...p, createdAt: new Date() });
+        }
+      }
+
+      const freshSnap = await getDocs(profileRef);
+      profilesContainer.innerHTML = "";
+
+      freshSnap.forEach(doc => {
+        const { name, avatar } = doc.data();
+        const div = document.createElement("div");
+        div.className = "profile";
+        div.innerHTML = `
+          <img src="${avatar}" alt="${name}" />
+          <div class="profile-name">${name}</div>
+        `;
+        div.onclick = () => {
+          window.location.href = `HomeScreen.html?user=${encodeURIComponent(email)}&profile=${encodeURIComponent(name)}`;
+        };
+        profilesContainer.appendChild(div);
+      });
     });
-  });
 
-  document.querySelector('.manage-btn').addEventListener('click', () => {
-    window.location.href = "manage.html";
-  });
-</script>
+    document.querySelector(".manage-btn").addEventListener("click", () => {
+      window.location.href = "manage.html";
+    });
 
+    const logoutBtn = document.createElement("button");
+    logoutBtn.textContent = "Logout";
+    Object.assign(logoutBtn.style, {
+      position: "absolute", top: "20px", right: "20px",
+      background: "transparent", color: "#aaa", border: "1px solid #aaa",
+      padding: "8px 14px", borderRadius: "4px", cursor: "pointer"
+    });
+    logoutBtn.onmouseenter = () => {
+      logoutBtn.style.color = "white";
+      logoutBtn.style.borderColor = "white";
+    };
+    logoutBtn.onmouseleave = () => {
+      logoutBtn.style.color = "#aaa";
+      logoutBtn.style.borderColor = "#aaa";
+    };
+    logoutBtn.onclick = async () => {
+      await signOut(auth);
+      window.location.href = "index.html";
+    };
+    document.body.appendChild(logoutBtn);
+  </script>
 </body>
 </html>

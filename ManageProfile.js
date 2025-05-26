@@ -1,0 +1,218 @@
+import { auth, db } from "./firebase.js";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  updateDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const profileGrid = document.getElementById("profileGrid");
+const addBtn = document.querySelector(".add-profile-btn");
+const doneBtn = document.querySelector(".done-profile-btn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+let uid = null;
+let profileRef = null;
+let localProfiles = [];
+
+const avatars = [
+  "Profiles/red.jpg",
+  "Profiles/blue.jpg",
+  "Profiles/yellow.jpg",
+  "Profiles/green.jpg"
+];
+
+// 🔐 Auth Guard
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  uid = user.uid;
+  profileRef = collection(db, "users", uid, "profiles");
+  await loadProfiles();
+});
+
+async function loadProfiles() {
+  localProfiles = [];
+  profileGrid.innerHTML = "";
+
+  const snapshot = await getDocs(profileRef);
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    localProfiles.push({
+      id: docSnap.id,
+      name: data.name,
+      avatar: data.avatar,
+      action: "none"
+    });
+  });
+
+  renderProfiles();
+}
+
+function renderProfiles() {
+  profileGrid.innerHTML = "";
+
+  localProfiles
+    .filter(p => p.action !== "delete")
+    .forEach(p => {
+      const div = document.createElement("div");
+      div.className = "profile-box";
+      div.setAttribute("data-id", p.id);
+
+      div.innerHTML = `
+        <div class="profile-img-wrapper">
+          <img src="${p.avatar}" class="profile-img" />
+          <img src="Icons/Edit.png" class="edit-icon" title="Edit Name" />
+        </div>
+        <div class="profile-name-wrapper">
+          <input type="text" value="${p.name}" class="profile-name-input" ${p.action === "add" ? "autofocus" : ""}/>
+          <div class="delete-icon" title="Delete Profile">🗑️</div>
+        </div>
+      `;
+	  
+	  const img = div.querySelector(".profile-img");
+img.addEventListener("click", () => {
+  const index = avatars.indexOf(p.avatar);
+  const nextIndex = (index + 1) % avatars.length;
+  p.avatar = avatars[nextIndex];
+  img.src = avatars[nextIndex];
+  if (p.action !== "add") p.action = "update";
+});
+
+
+      const input = div.querySelector(".profile-name-input");
+      const editIcon = div.querySelector(".edit-icon");
+      const deleteIcon = div.querySelector(".delete-icon");
+
+      input.readOnly = p.action !== "add";
+
+      editIcon.onclick = () => {
+        input.readOnly = false;
+        input.classList.add("editing");
+        input.focus();
+      };
+
+      input.addEventListener("blur", () => {
+        input.readOnly = true;
+        input.classList.remove("editing");
+      });
+
+      deleteIcon.onclick = () => {
+        p.action = "delete";
+        renderProfiles();
+      };
+
+      profileGrid.appendChild(div);
+    });
+}
+
+addBtn.addEventListener("click", () => {
+  const activeCount = localProfiles.filter(p => p.action !== "delete").length;
+  if (activeCount >= 10) {
+    showLimitBanner("⚠️ You can only have a maximum of 10 profiles.");
+    return;
+  }
+
+  const base = "User";
+  let index = 1;
+  let name = `${base}${index}`;
+  while (localProfiles.some(p => p.name.toLowerCase() === name.toLowerCase() && p.action !== "delete")) {
+    index++;
+    name = `${base}${index}`;
+  }
+
+  localProfiles.push({
+    id: "temp_" + Date.now(),
+    name,
+    avatar: avatars[Math.floor(Math.random() * avatars.length)],
+    action: "add"
+  });
+
+  renderProfiles();
+});
+
+doneBtn.addEventListener("click", async () => {
+  // 🔄 Update localProfiles names from DOM
+  document.querySelectorAll(".profile-box").forEach(box => {
+    const input = box.querySelector(".profile-name-input");
+    const id = box.getAttribute("data-id");
+
+    const profile = localProfiles.find(p => p.id === id);
+    if (profile && input) {
+      const newName = input.value.trim();
+      profile.name = newName;
+      if (profile.action !== "add") {
+        profile.action = "update";
+      }
+    }
+  });
+  
+  const nameRegex = /^[a-zA-Z0-9 ]+$/;
+
+for (const p of localProfiles.filter(p => p.action !== "delete")) {
+  if (!p.name || !nameRegex.test(p.name.trim())) {
+    showLimitBanner(`❌ Invalid name: "${p.name}" (Only letters, numbers, spaces allowed)`);
+    return;
+  }
+}
+
+
+  // ❌ Check for duplicate names
+  const namesSeen = new Set();
+  for (const p of localProfiles.filter(p => p.action !== "delete")) {
+    const key = p.name.toLowerCase();
+    if (namesSeen.has(key)) {
+      showLimitBanner(`❌ Duplicate profile name: "${p.name}"`);
+      return;
+    }
+    namesSeen.add(key);
+  }
+
+  // ✅ Sync to Firestore
+  for (const p of localProfiles) {
+    if (p.action === "add" && p.name) {
+      await addDoc(profileRef, {
+        name: p.name,
+        avatar: p.avatar,
+        createdAt: new Date()
+      });
+    } else if (p.action === "update" && p.name) {
+      await updateDoc(doc(profileRef, p.id), {
+        name: p.name,
+        avatar: p.avatar // ✅ include avatar update
+      });
+    } else if (p.action === "delete") {
+      await deleteDoc(doc(profileRef, p.id));
+    }
+  }
+
+  window.location.href = "ProfileScreen.html";
+});
+
+logoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+});
+
+function showLimitBanner(message) {
+  const banner = document.getElementById("limit-banner");
+  banner.textContent = message;
+  banner.style.display = "block";
+  banner.classList.add("show");
+
+  setTimeout(() => {
+    banner.classList.remove("show");
+    setTimeout(() => {
+      banner.style.display = "none";
+    }, 500);
+  }, 5000);
+}

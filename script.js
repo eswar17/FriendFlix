@@ -9,6 +9,14 @@ import {
 const urlParams = new URLSearchParams(window.location.search);
 const registered = urlParams.get("registered");
 
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.location.href = "ProfileScreen.html";
+    }
+  });
+
 if (registered === "success") {
   const successBox = document.createElement("div");
   successBox.id = "successBox";
