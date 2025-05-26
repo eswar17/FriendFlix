@@ -7,7 +7,7 @@ header {
   padding: 10px 30px; z-index: 999;
 }
 .logo { width: 150px; margin-right: 50px; }
-nav a {
+nav a { 
   color: #fff; margin-right: 30px;
   text-decoration: none; font-size: 20px;
 }
