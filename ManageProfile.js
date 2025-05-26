@@ -13,6 +13,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const profileGrid = document.getElementById("profileGrid");
+const chooseProfileIcons = document.getElementById("chooseProfileIcons");
+const profileIcons = document.getElementById("profileIcons");
 const addBtn = document.querySelector(".add-profile-btn");
 const doneBtn = document.querySelector(".done-profile-btn");
 const logoutBtn = document.getElementById("logoutBtn");
@@ -20,24 +22,14 @@ const logoutBtn = document.getElementById("logoutBtn");
 let uid = null;
 let profileRef = null;
 let activeAvatarPicker = null;
+let chooseAvatarText = null;
+let borderAnimation = null;
 
 const avatars = [
   "Profiles/red.jpg",
   "Profiles/blue.jpg",
   "Profiles/yellow.jpg",
-  "Profiles/green.jpg",
-  "Profiles/blue.jpg",
-  "Profiles/yellow.jpg",
-  "Profiles/blue.jpg",
-  "Profiles/yellow.jpg",
-  "Profiles/blue.jpg",
-  "Profiles/yellow.jpg",
-  "Profiles/blue.jpg",
-  "Profiles/yellow.jpg",
-  "Profiles/blue.jpg",
-  "Profiles/yellow.jpg",
-  "Profiles/blue.jpg",
-  "Profiles/yellow.jpg"
+  "Profiles/green.jpg"
 ];
 
 let localProfiles = [];
@@ -56,6 +48,8 @@ onAuthStateChanged(auth, async (user) => {
 async function loadProfiles() {
   localProfiles = [];
   profileGrid.innerHTML = "";
+  chooseProfileIcons.innerHTML = "";
+  profileIcons.innerHTML = "";
 
   const snapshot = await getDocs(profileRef);
   snapshot.forEach(docSnap => {
@@ -70,6 +64,45 @@ async function loadProfiles() {
 
   renderProfiles();
 }
+
+function renderAvatarSelector(targetProfile) {
+  const existing = document.getElementById("avatarSelector");
+  if (existing) existing.remove(); // only one open at a time
+
+  const row = document.createElement("div");
+  row.id = "avatarSelector";
+  row.className = "avatar-selector-row";
+
+  avatars.forEach(avatar => {
+    const img = document.createElement("img");
+    img.src = avatar;
+    img.className = "avatar-option";
+    if (avatar === targetProfile.avatar) {
+      img.classList.add("selected");
+    }
+
+    img.addEventListener("click", () => {
+      targetProfile.avatar = avatar;
+      if (targetProfile.action !== "add") {
+        targetProfile.action = "update";
+      }
+      renderProfiles(); // redraw to reflect updated avatar
+      renderAvatarSelector(targetProfile); // reopen the selector under the same profile
+    });
+
+    row.appendChild(img);
+  });
+  const avatarPicker = document.querySelector(".avatar-picker");
+if (avatarPicker.scrollWidth <= avatarPicker.clientWidth) {
+  avatarPicker.classList.add("no-scroll");
+} else {
+  avatarPicker.classList.remove("no-scroll");
+}
+
+
+  targetProfile.element.after(row); // 🧠 Insert below current profile box
+}
+
 
 function renderProfiles() {
   profileGrid.innerHTML = "";
@@ -118,12 +151,34 @@ function renderProfiles() {
     };
 
     profileGrid.appendChild(div);
+	p.element = div; // ✅ Save element reference for avatar selector
   });
 }
 
 function showAvatarPicker(profileId, parentDiv) {
+  // ❌ Remove previous avatar picker and highlight
   if (activeAvatarPicker) activeAvatarPicker.remove();
+  if (chooseAvatarText) chooseAvatarText.remove();
 
+  document.querySelectorAll('.profile-box').forEach(box => {
+    box.style.transform = "scale(1)";
+    const img = box.querySelector('.profile-img');
+    img.classList.remove("glow-highlight");
+  });
+
+  // 🌟 Highlight current profile
+  const profileBox = document.querySelector(`.profile-box[data-id="${profileId}"]`);
+  profileBox.style.transform = "scale(1.1)";
+  const glowingImg = profileBox.querySelector('.profile-img');
+  glowingImg.classList.add("glow-highlight");
+
+  // 🏷️ Create "Choose Profile Icon" label
+  const chooseAvatar = document.createElement("div");
+  chooseAvatar.className = "choose-avatar";
+  chooseAvatar.textContent = "Choose Profile Icon:";
+  chooseAvatar.style.display = "block";
+
+  // 🖼️ Create scrollable row of avatars
   const picker = document.createElement("div");
   picker.className = "avatar-picker";
 
@@ -134,22 +189,28 @@ function showAvatarPicker(profileId, parentDiv) {
     img.src = avatar;
     img.className = "avatar-thumb";
 
-    if (currentProfile.avatar === avatar) {
+    if (avatar === currentProfile.avatar) {
       img.classList.add("selected");
     }
 
     img.onclick = () => {
       currentProfile.avatar = avatar;
       if (currentProfile.action !== "add") currentProfile.action = "update";
-      renderProfiles(); // re-render after selection
+      renderProfiles(); // refresh profiles
+      showAvatarPicker(profileId, parentDiv); // reattach avatar picker to same profile
     };
 
     picker.appendChild(img);
   });
 
-  profileGrid.appendChild(picker);
+  // 📌 Append to UI
+  chooseProfileIcons.appendChild(chooseAvatar);
+  profileIcons.appendChild(picker);
+
   activeAvatarPicker = picker;
+  chooseAvatarText = chooseAvatar;
 }
+
 
 
 addBtn.addEventListener("click", () => {
