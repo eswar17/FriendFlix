@@ -1,3 +1,7 @@
+import { db, auth } from './firebase.js';
+import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const $ = id => document.getElementById(id);
   const mainVideo = $("mainVideo");
@@ -234,29 +238,32 @@ function createMovieCard(item) {
   tag.className = "tag";
   if (item.status) tag.textContent = item.status;
 
-  // ✅ Heart wrapper (for absolute positioning)
   const heartWrapper = document.createElement("div");
   heartWrapper.className = "heart-wrapper";
 
-  // ❤️ Heart icon with tooltip
   const heart = document.createElement("div");
   heart.className = "heart-icon";
-  heart.innerHTML = isInMyList(item.src) ? "❤️" : "🤍";
 
+  // 🧠 Initially placeholder (updated later after async check)
+  heart.innerHTML = "🤍";
   const tooltip = document.createElement("span");
   tooltip.className = "tooltip-text";
-  tooltip.textContent = isInMyList(item.src) ? "Remove from My List" : "Add to My List";
-
+  tooltip.textContent = "Add to My List";
   heart.appendChild(tooltip);
   heartWrapper.appendChild(heart);
 
-  // Events
   heart.addEventListener("click", (e) => {
     e.stopPropagation();
-    toggleMyList(item, heart);
+    toggleMyList(item, heart); // ❤️ updates after Firebase operation
   });
 
-  // Append elements
+  // ✅ Async check for current item in My List
+  (async () => {
+    const saved = await isInMyList(item.src);
+    heart.innerHTML = saved ? "❤️" : "🤍";
+    tooltip.textContent = saved ? "Remove from My List" : "Add to My List";
+  })();
+
   card.append(img, video, title);
   if (item.status) card.appendChild(tag);
   card.appendChild(heartWrapper);
@@ -264,6 +271,7 @@ function createMovieCard(item) {
   bindMovieCardEvents(card);
   return card;
 }
+
 
 
 
@@ -501,76 +509,92 @@ function renderFilteredSection(section) {
 // 4️⃣ Call this on page load
 setupTvShowsDropdown();
 
-function getMyList() {
-  return JSON.parse(localStorage.getItem("myList") || "[]");
+function getCurrentUser() {
+  return new Promise((resolve) => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      unsub();
+      resolve(user);
+    });
+  });
 }
 
-function saveMyList(list) {
-  localStorage.setItem("myList", JSON.stringify(list));
+async function getMyList() {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  const profile = new URLSearchParams(window.location.search).get("user");
+  const listRef = collection(db, "users", user.uid, "profiles", profile, "myList");
+
+  const snapshot = await getDocs(listRef);
+  const videos = [];
+  snapshot.forEach(doc => videos.push(doc.data()));
+  return videos;
 }
 
-function isInMyList(src) {
-  return getMyList().some(video => video.src === src);
+async function isInMyList(videoSrc) {
+  const myList = await getMyList();
+  return myList.some(video => video.src === videoSrc);
 }
 
-function toggleMyList(videoItem, clickedHeart) {
-  let list = getMyList();
-  const index = list.findIndex(v => v.src === videoItem.src);
-  const inList = index > -1;
+async function toggleMyList(videoItem, clickedHeart) {
+  const user = await getCurrentUser();
+  if (!user) return;
 
-  if (inList) {
-    list.splice(index, 1);
-    saveMyList(list);
+  const profile = new URLSearchParams(window.location.search).get("user");
+  const videoId = btoa(videoItem.src);
+  const ref = doc(db, "users", user.uid, "profiles", profile, "myList", videoId);
+
+  const isSaved = await isInMyList(videoItem.src);
+
+  // ✅ Instant UI update before waiting for Firebase
+  document.querySelectorAll(`.movie-card[data-video="${videoItem.src}"] .heart-icon`).forEach(heart => {
+    const icon = isSaved ? "🤍" : "❤️";
+    const tooltipText = isSaved ? "Add to My List" : "Remove from My List";
+
+    heart.innerHTML = icon;
+    const tooltip = document.createElement("span");
+    tooltip.className = "tooltip-text";
+    tooltip.textContent = tooltipText;
+    heart.appendChild(tooltip);
+  });
+
+  // 🕒 Firebase call after UI update
+  if (isSaved) {
+    deleteDoc(ref); // not awaited to avoid UI block
   } else {
-    list.push(videoItem);
-    saveMyList(list);
+    setDoc(ref, videoItem); // not awaited to avoid UI block
   }
 
-document.querySelectorAll(`.movie-card[data-video="${videoItem.src}"] .heart-icon`).forEach(heart => {
-  const isSaved = isInMyList(videoItem.src);
-  heart.innerHTML = isSaved ? "❤️" : "🤍";
-
-  const tooltip = document.createElement("span");
-  tooltip.className = "tooltip-text";
-  tooltip.textContent = isSaved ? "Remove from My List" : "Add to My List";
-  heart.appendChild(tooltip);
-});
-
-
-  // ✨ Extra logic: if current view is My List, remove card from DOM
-if (currentView === "mylist") {
+  // MyList screen cleanup (optional delay)
+  if (currentView === "mylist" && isSaved) {
     const card = clickedHeart.closest(".movie-card");
-    if (card && !isInMyList(videoItem.src)) {
-      card.remove();
-    }
-	// 🧼 Check if My List is empty after removal
-if (getMyList().length === 0 && document.getElementById("searchResults").classList.contains("active")) {
-  searchResults.innerHTML = `
-  <div style="
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: calc(100vh - 100px);
-    width: 100%;
-    color: #aaa;
-    font-size: 20px;
-    text-align: center;
-  ">
-    😶 Your list is empty!
-  </div>
-`;
+    if (card) card.remove();
 
-}
-
+    setTimeout(async () => {
+      const list = await getMyList();
+      if (list.length === 0) {
+        searchResults.innerHTML = `
+          <div style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            height:calc(100vh - 100px);
+            width:100%;
+            color:#aaa;
+            font-size:20px;
+            text-align:center;">
+            😶 Your list is empty!
+          </div>
+        `;
+      }
+    }, 100); // slight delay for cleanup
   }
 }
 
-
-document.getElementById("myListLink").addEventListener("click", (e) => {
-  muteMainVideo();
+document.getElementById("myListLink").addEventListener("click", async (e) => {
   e.preventDefault();
+  muteMainVideo();
   currentView = "mylist";
-  const saved = getMyList();
 
   mainContent.style.display = "none";
   searchResults.innerHTML = "";
@@ -588,35 +612,36 @@ document.getElementById("myListLink").addEventListener("click", (e) => {
   const row = document.createElement("div");
   row.className = "row";
 
-  saved.forEach(item => {
-    const card = createMovieCard(item);
-    row.appendChild(card);
-  });
+  const saved = await getMyList(); // ✅ await here
 
-if (saved.length === 0) {
-  const noItem = document.createElement("div");
+  if (saved.length === 0) {
+    const noItem = document.createElement("div");
 
-  Object.assign(noItem.style, {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    color: "#aaa",
-    fontSize: "20px",
-    textAlign: "center",
-    zIndex: "10"
-  });
+    Object.assign(noItem.style, {
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      color: "#aaa",
+      fontSize: "20px",
+      textAlign: "center",
+      zIndex: "10"
+    });
 
-  noItem.textContent = "😶 Your list is empty!";
-  wrapper.appendChild(noItem);
-} else {
-  wrapper.appendChild(header);
-  wrapper.appendChild(row);
-}
-
+    noItem.textContent = "😶 Your list is empty!";
+    wrapper.appendChild(noItem);
+  } else {
+    saved.forEach(item => {
+      const card = createMovieCard(item);
+      row.appendChild(card);
+    });
+    wrapper.appendChild(header);
+    wrapper.appendChild(row);
+  }
 
   searchResults.appendChild(wrapper);
 });
+
 
 function setupMoviesDropdown() {
   const moviesLink = document.querySelector('nav a:nth-child(3)'); // Movies link
@@ -736,14 +761,10 @@ function muteMainVideo() {
   muteBtn.textContent = "🔇";
 }
 
-import { db, auth } from './firebase.js';
-import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
 const profileDropdown = document.getElementById("profileDropdown");
 const profileMenu = document.getElementById("profileMenu");
 const activeProfileIcon = document.getElementById("activeProfileIcon");
-const userParam = new URLSearchParams(window.location.search).get("user") || "User";
+const userParam = new URLSearchParams(window.location.search).get("user") || "Eswar";
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
