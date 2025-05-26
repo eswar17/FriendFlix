@@ -19,16 +19,29 @@ const logoutBtn = document.getElementById("logoutBtn");
 
 let uid = null;
 let profileRef = null;
-let localProfiles = [];
+let activeAvatarPicker = null;
 
 const avatars = [
   "Profiles/red.jpg",
   "Profiles/blue.jpg",
   "Profiles/yellow.jpg",
-  "Profiles/green.jpg"
+  "Profiles/green.jpg",
+  "Profiles/blue.jpg",
+  "Profiles/yellow.jpg",
+  "Profiles/blue.jpg",
+  "Profiles/yellow.jpg",
+  "Profiles/blue.jpg",
+  "Profiles/yellow.jpg",
+  "Profiles/blue.jpg",
+  "Profiles/yellow.jpg",
+  "Profiles/blue.jpg",
+  "Profiles/yellow.jpg",
+  "Profiles/blue.jpg",
+  "Profiles/yellow.jpg"
 ];
 
-// 🔐 Auth Guard
+let localProfiles = [];
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "index.html";
@@ -61,59 +74,83 @@ async function loadProfiles() {
 function renderProfiles() {
   profileGrid.innerHTML = "";
 
-  localProfiles
-    .filter(p => p.action !== "delete")
-    .forEach(p => {
-      const div = document.createElement("div");
-      div.className = "profile-box";
-      div.setAttribute("data-id", p.id);
+  localProfiles.filter(p => p.action !== "delete").forEach(p => {
+    const div = document.createElement("div");
+    div.className = "profile-box";
+    div.setAttribute("data-id", p.id);
 
-      div.innerHTML = `
-        <div class="profile-img-wrapper">
-          <img src="${p.avatar}" class="profile-img" />
-          <img src="Icons/Edit.png" class="edit-icon" title="Edit Name" />
-        </div>
-        <div class="profile-name-wrapper">
-          <input type="text" value="${p.name}" class="profile-name-input" ${p.action === "add" ? "autofocus" : ""}/>
-          <div class="delete-icon" title="Delete Profile">🗑️</div>
-        </div>
-      `;
-	  
-	  const img = div.querySelector(".profile-img");
-img.addEventListener("click", () => {
-  const index = avatars.indexOf(p.avatar);
-  const nextIndex = (index + 1) % avatars.length;
-  p.avatar = avatars[nextIndex];
-  img.src = avatars[nextIndex];
-  if (p.action !== "add") p.action = "update";
-});
+    div.innerHTML = `
+      <div class="profile-img-wrapper">
+        <img src="${p.avatar}" class="profile-img" />
+        <img src="Icons/Edit.png" class="edit-icon" title="Edit Name" />
+        <div class="delete-icon" title="Delete Profile">🗑️</div>
+        <div class="change-avatar-btn">Change Profile Icon</div>
+      </div>
+      <div class="profile-name-wrapper">
+        <input type="text" value="${p.name}" class="profile-name-input" ${p.action === "add" ? "autofocus" : ""}/>
+      </div>
+    `;
 
+    const input = div.querySelector(".profile-name-input");
+    const editIcon = div.querySelector(".edit-icon");
+    const deleteIcon = div.querySelector(".delete-icon");
+    const changeBtn = div.querySelector(".change-avatar-btn");
 
-      const input = div.querySelector(".profile-name-input");
-      const editIcon = div.querySelector(".edit-icon");
-      const deleteIcon = div.querySelector(".delete-icon");
+    input.readOnly = p.action !== "add";
 
-      input.readOnly = p.action !== "add";
-
-      editIcon.onclick = () => {
-        input.readOnly = false;
-        input.classList.add("editing");
-        input.focus();
-      };
-
-      input.addEventListener("blur", () => {
-        input.readOnly = true;
-        input.classList.remove("editing");
-      });
-
-      deleteIcon.onclick = () => {
-        p.action = "delete";
-        renderProfiles();
-      };
-
-      profileGrid.appendChild(div);
+    editIcon.onclick = () => {
+      input.readOnly = false;
+      input.classList.add("editing");
+      input.focus();
+    };
+    input.addEventListener("blur", () => {
+      input.readOnly = true;
+      input.classList.remove("editing");
     });
+
+    deleteIcon.onclick = () => {
+      p.action = "delete";
+      renderProfiles();
+    };
+
+    changeBtn.onclick = () => {
+      showAvatarPicker(p.id, div);
+    };
+
+    profileGrid.appendChild(div);
+  });
 }
+
+function showAvatarPicker(profileId, parentDiv) {
+  if (activeAvatarPicker) activeAvatarPicker.remove();
+
+  const picker = document.createElement("div");
+  picker.className = "avatar-picker";
+
+  const currentProfile = localProfiles.find(p => p.id === profileId);
+
+  avatars.forEach(avatar => {
+    const img = document.createElement("img");
+    img.src = avatar;
+    img.className = "avatar-thumb";
+
+    if (currentProfile.avatar === avatar) {
+      img.classList.add("selected");
+    }
+
+    img.onclick = () => {
+      currentProfile.avatar = avatar;
+      if (currentProfile.action !== "add") currentProfile.action = "update";
+      renderProfiles(); // re-render after selection
+    };
+
+    picker.appendChild(img);
+  });
+
+  profileGrid.appendChild(picker);
+  activeAvatarPicker = picker;
+}
+
 
 addBtn.addEventListener("click", () => {
   const activeCount = localProfiles.filter(p => p.action !== "delete").length;
@@ -141,13 +178,11 @@ addBtn.addEventListener("click", () => {
 });
 
 doneBtn.addEventListener("click", async () => {
-  // 🔄 Update localProfiles names from DOM
   document.querySelectorAll(".profile-box").forEach(box => {
     const input = box.querySelector(".profile-name-input");
     const id = box.getAttribute("data-id");
-
     const profile = localProfiles.find(p => p.id === id);
-    if (profile && input) {
+    if (profile && !input.readOnly) {
       const newName = input.value.trim();
       profile.name = newName;
       if (profile.action !== "add") {
@@ -155,18 +190,7 @@ doneBtn.addEventListener("click", async () => {
       }
     }
   });
-  
-  const nameRegex = /^[a-zA-Z0-9 ]+$/;
 
-for (const p of localProfiles.filter(p => p.action !== "delete")) {
-  if (!p.name || !nameRegex.test(p.name.trim())) {
-    showLimitBanner(`❌ Invalid name: "${p.name}" (Only letters, numbers, spaces allowed)`);
-    return;
-  }
-}
-
-
-  // ❌ Check for duplicate names
   const namesSeen = new Set();
   for (const p of localProfiles.filter(p => p.action !== "delete")) {
     const key = p.name.toLowerCase();
@@ -177,7 +201,6 @@ for (const p of localProfiles.filter(p => p.action !== "delete")) {
     namesSeen.add(key);
   }
 
-  // ✅ Sync to Firestore
   for (const p of localProfiles) {
     if (p.action === "add" && p.name) {
       await addDoc(profileRef, {
@@ -188,7 +211,7 @@ for (const p of localProfiles.filter(p => p.action !== "delete")) {
     } else if (p.action === "update" && p.name) {
       await updateDoc(doc(profileRef, p.id), {
         name: p.name,
-        avatar: p.avatar // ✅ include avatar update
+        avatar: p.avatar
       });
     } else if (p.action === "delete") {
       await deleteDoc(doc(profileRef, p.id));
