@@ -20,6 +20,13 @@ import { doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.
   const mainContent = $("mainContent");
   const userName = new URLSearchParams(window.location.search).get("user") || "User";
   let currentView = "home"; // Can be "home", "search", or "mylist"
+  
+  onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+	});
 
   document.getElementById("homeLink").href = `?user=${userName}`;
   let flag=false;
