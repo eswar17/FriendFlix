@@ -244,7 +244,7 @@ nav a:hover { text-decoration: underline; }
   background: #111;
   padding: 10px 0;
   border-radius: 6px;
-  z-index: 9999;
+  z-index: 10050;
   width: 230px;
   box-shadow: 0 0 10px rgba(0,0,0,0.7);
 }
@@ -279,13 +279,14 @@ nav a:hover { text-decoration: underline; }
   margin: 6px 0;
 }
 
-.signout-item {
+.exit-profile, .signout-item {
   padding: 8px 16px;
   color: #eee;
   cursor: pointer;
+  text-align: center;
 }
 
-.signout-item:hover {
+.exit-profile:hover, .signout-item:hover {
   background: #222;
 }
 .dropdown-arrow {

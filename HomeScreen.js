@@ -817,3 +817,8 @@ document.getElementById("signOutBtn").addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "index.html";
 });
+
+// Exit profile
+document.getElementById("exitProfile").addEventListener("click", async () => {
+  window.location.href = "ProfileScreen.html";
+});
