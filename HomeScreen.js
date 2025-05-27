@@ -420,11 +420,10 @@ function setupTvShowsDropdown() {
   const dropdown = document.createElement('div');
   dropdown.id = "tvDropdown";
   dropdown.style.position = "fixed";
-  dropdown.style.top = "50px";
+  dropdown.style.top = "47px";
   dropdown.style.left = tvLink.getBoundingClientRect().left + 'px';
   dropdown.style.background = "#111";
-  dropdown.style.border = "1px solid #444";
-  dropdown.style.padding = "10px";
+  dropdown.style.padding = "10px 0px";
   dropdown.style.borderRadius = "6px";
   dropdown.style.display = "none";
   dropdown.style.zIndex = 999;
@@ -433,8 +432,10 @@ function setupTvShowsDropdown() {
   sections.forEach(section => {
     const item = document.createElement("div");
     item.textContent = section;
+	item.style.alignItems = "center";
+	item.style.transition = "background 0.2s"
     item.style.color = "white";
-    item.style.padding = "5px 10px";
+    item.style.padding = "8px 16px";
     item.style.cursor = "pointer";
     item.addEventListener("click", () => {
 	  muteMainVideo();
@@ -452,7 +453,7 @@ function setupTvShowsDropdown() {
 
   document.body.appendChild(dropdown);
 
-tvLink.addEventListener("click", (e) => {
+tvLink.addEventListener("mouseenter", (e) => {
   e.preventDefault();
 
   // Forcefully bring dropdown to correct position and above everything
@@ -468,11 +469,19 @@ tvLink.addEventListener("click", (e) => {
 
 
   // Optional: click outside to close
-  document.addEventListener("click", (e) => {
-    if (!dropdown.contains(e.target) && e.target !== tvLink) {
+  let dropdownHideTimeout;
+
+document.addEventListener("mousemove", (e) => {
+  clearTimeout(dropdownHideTimeout); // prevent early hiding
+
+  const isInside = dropdown.contains(e.target) || tvLink.contains(e.target);
+  if (!isInside) {
+    dropdownHideTimeout = setTimeout(() => {
       dropdown.style.display = "none";
-    }
-  });
+    }, 200); // slight delay helps for better UX
+  }
+});
+
 }
 
 // 3️⃣ Render section-specific cards like search results
@@ -649,21 +658,22 @@ function setupMoviesDropdown() {
   const dropdown = document.createElement('div');
   dropdown.id = "moviesDropdown";
   dropdown.style.position = "fixed";
-  dropdown.style.top = "50px";
+  dropdown.style.top = "47px";
   dropdown.style.left = moviesLink.getBoundingClientRect().left + 'px';
   dropdown.style.background = "#111";
-  dropdown.style.border = "1px solid #444";
-  dropdown.style.padding = "10px";
+  dropdown.style.padding = "10px 0px";
   dropdown.style.borderRadius = "6px";
   dropdown.style.display = "none";
   dropdown.style.zIndex = 999;
 
   // Loop through moviesArr and create items
   moviesArr.forEach(({ key, value }) => {
-    const item = document.createElement("div");
+	const item = document.createElement("div");
     item.textContent = key;
+	item.style.alignItems = "center";
+	item.style.transition = "background 0.2s"
     item.style.color = "white";
-    item.style.padding = "5px 10px";
+    item.style.padding = "8px 16px";
     item.style.cursor = "pointer";
 
     item.addEventListener("click", () => {
@@ -680,7 +690,7 @@ function setupMoviesDropdown() {
 
   document.body.appendChild(dropdown);
 
-  moviesLink.addEventListener("click", (e) => {
+  moviesLink.addEventListener("mouseenter", (e) => {
     e.preventDefault();
     const rect = moviesLink.getBoundingClientRect();
     dropdown.style.left = rect.left + "px";
@@ -689,11 +699,19 @@ function setupMoviesDropdown() {
     dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
   });
 
-  document.addEventListener("click", (e) => {
-    if (!dropdown.contains(e.target) && e.target !== moviesLink) {
+let dropdownHideTimeout;
+
+document.addEventListener("mousemove", (e) => {
+  clearTimeout(dropdownHideTimeout); // prevent early hiding
+
+  const isInside = dropdown.contains(e.target) || moviesLink.contains(e.target);
+  if (!isInside) {
+    dropdownHideTimeout = setTimeout(() => {
       dropdown.style.display = "none";
-    }
-  });
+    }, 200); // slight delay helps for better UX
+  }
+});
+
 }
 
 
