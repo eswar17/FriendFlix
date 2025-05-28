@@ -28,7 +28,19 @@ const avatars = [
   "Profiles/red.jpg",
   "Profiles/blue.jpg",
   "Profiles/yellow.jpg",
-  "Profiles/green.jpg"
+  "Profiles/green.jpg",
+  "Profiles/luca1.jpg",
+  "Profiles/luca2.jpg",
+  "Profiles/luca3.jpg",
+  "Profiles/luca4.jpg",
+  "Profiles/luca5.jpg",
+  "Profiles/luca6.jpg",
+  "Profiles/luca7.jpg",
+  "Profiles/luca8.jpg",
+  "Profiles/luca9.jpg",
+  "Profiles/luca10.jpg",
+  "Profiles/luca11.jpg",
+  "Profiles/luca12.jpg"
 ];
 
 let localProfiles = [];
