@@ -55,6 +55,11 @@ onAuthStateChanged(auth, async (user) => {
   await loadProfiles();
 });
 
+    logoutBtn.onclick = async () => {
+      await signOut(auth);
+      window.location.href = "index.html";
+    };
+
 async function loadProfiles() {
   localProfiles = [];
   profileGrid.innerHTML = "";
