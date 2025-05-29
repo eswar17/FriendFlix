@@ -7,6 +7,20 @@ const moviesArr = [
 
 
 const heroVideos = [{
+    src: "Videos/pavanSendoff.mp4",
+    title: "Pavan Sendoff at RGIA",
+    image: "Videos/pavanSendoff.png",
+    subtitle: "An emotional goodbye, wrapped in silence and tears",
+    desc: "Captured at Hyderabad Airport, this short emotional edit shows Pavan and Vaishnavi’s heartfelt send-off before his flight to Australia — a moment that speaks louder than words.",
+    meta: "2025 | Real Moments | Telugu | Emotional Edit",
+    info: `This scene captures the raw emotions of a newly married couple separated by distance but united by love.<br>
+    Silent glances, tight hugs, and tears they tried to hide — this unscripted send-off speaks volumes.<br><br>
+    <strong>Genres:</strong> Emotional, Real Life, Departure`,
+    tags: "Pavan, Vaishnavi, airport, sendoff, emotional, australia, 2025, love, tears, hyderabad, RGIA, farewell, couple",
+    section: "FriendFlix Originals, Rewind Romance",
+    status: "Recently added"
+},
+{
         src: "Videos/pavanPelliHighlights.mp4",
         title: "Pavan Pelli Highlights",
         image: "Videos/pavanPelliHighlights.jpg",
